@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="menu.css">
 </head>
 <body>
   <header class="navbar">
@@ -22,56 +22,23 @@
       </button>
       
       <nav class="nav-links" id="nav-links">
-        <a href="index.html" class="active">Home</a>
-        <a href="menu.html">Menu</a>
+        <a href="index.html">Home</a>
+        <a href="menu.html" class="active">Menu</a>
         <a href="contactus.html">Contact Us</a>
+        <div class="cart-icon-container" id="cart-icon">
+          <div class="cart-icon">
+            <div class="cart-handle"></div>
+            <div class="cart-body"></div>
+            <div class="cart-wheel"></div>
+            <div class="cart-wheel"></div>
+          </div>
+          <span id="cart-count">0</span>
+        </div>
       </nav>
     </div>
   </header>
 
-  <main>
-    <section class="hero-home">
-      <div class="hero-content">
-        <h1>Welcome</h1>
-        <h2>To Empunk Resto</h2>
-      </div>
-    </section>
-    
-    <section class="chef-section">
-      <div class="container">
-        <h2 class="section-title">Our Chef</h2>
-        <div class="chef-circle-grid">
-          <div class="chef-circle">
-            <div class="circle-photo">
-              <img src="rahma.jpg" alt="Chef Rahma Allysa Abelya">
-            </div>
-            <h3>RAHMA ALLYSA<br>ABELYA</h3>
-          </div>
-          
-          <div class="chef-circle">
-            <div class="circle-photo">
-              <img src="rahma.jpg" alt="Chef Dwi Apriliani Putri">
-            </div>
-            <h3>DWI APRILIANI<br>PUTRI</h3>
-          </div>
-          
-          <div class="chef-circle">
-            <div class="circle-photo">
-              <img src="rahma.jpg" alt="Chef Muhammad Akbar N">
-            </div>
-            <h3>MUHAMMAD AKBAR<br>NURDIANTO</h3>
-          </div>
-          
-          <div class="chef-circle">
-            <div class="circle-photo">
-              <img src="rahma.jpg" alt="Chef Bagus Satrio W">
-            </div>
-            <h3>BAGUS SATRIO<br>WICAKSONO</h3>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
+  
 
   <footer class="restaurant-footer">
     <div class="footer-container">

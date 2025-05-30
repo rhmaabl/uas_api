@@ -110,107 +110,75 @@ body {
   cursor: pointer;
 }
 
-/* Hero Section */
-.hero-home {
+/* Cart Icon Styles */
+.cart-icon-container {
   position: relative;
-  background: url('index.jpg') center/cover no-repeat;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  color: var(--white);
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: transform 0.3s ease;
 }
 
-.hero-home::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  z-index: 1;
-}
-
-.hero-content {
-  position: relative;
-  z-index: 2;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.hero-content h1 {
-  font-size: 4rem;
-  font-weight: 400;
-  margin-bottom: 1rem;
-  font-family: 'Playfair Display', serif;
-  font-style: italic;
-}
-
-.hero-content h2 {
-  font-size: 2rem;
-  font-weight: 300;
-  font-style: italic;
-}
-
-/* Chef Section */
-.chef-section {
-  padding: 5rem 0;
-  background-color: var(--white);
-  text-align: center;
-}
-
-.section-title {
-  font-size: 2.5rem;
-  margin-bottom: 3rem;
-  color: var(--dark);
-}
-
-.chef-circle-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-}
-
-.chef-circle {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.circle-photo {
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 4px solid var(--dark);
-  margin-bottom: 1.5rem;
-  transition: all 0.3s ease;
-}
-
-.circle-photo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s ease;
-}
-
-.chef-circle h3 {
-  font-size: 1.2rem;
-  color: var(--dark);
-  line-height: 1.4;
-  font-weight: 600;
-}
-
-.chef-circle:hover .circle-photo {
-  transform: scale(1.05);
-  border-color: var(--primary);
-  box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-}
-
-.chef-circle:hover .circle-photo img {
+.cart-icon-container:hover {
   transform: scale(1.1);
+}
+
+.cart-icon {
+  position: relative;
+  width: 40px;
+  height: 30px;
+}
+
+.cart-body {
+  position: absolute;
+  width: 30px;
+  height: 20px;
+  background-color: var(--white);
+  border-radius: 3px;
+  bottom: 0;
+  left: 5px;
+}
+
+.cart-handle {
+  position: absolute;
+  width: 10px;
+  height: 8px;
+  background-color: var(--white);
+  border-radius: 3px 3px 0 0;
+  top: 0;
+  left: 15px;
+}
+
+.cart-wheel {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background-color: var(--dark);
+  border-radius: 50%;
+  bottom: -4px;
+}
+
+.cart-wheel:first-child {
+  left: 8px;
+}
+
+.cart-wheel:last-child {
+  right: 8px;
+}
+
+#cart-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: var(--secondary);
+  color: var(--white);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.8rem;
+  font-weight: bold;
 }
 
 /* Footer Styles */
