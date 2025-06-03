@@ -18,10 +18,10 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#">Menu</a>
+                        <a class="nav-link active" href="menu.html">Menu</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Orders</a>
+                        <a class="nav-link" href="../order/order.html">Orders</a>
                     </li>
                 </ul>
                 <div class="d-flex align-items-center">
@@ -121,23 +121,35 @@
 
     <!-- Cart Modal -->
     <div class="modal fade" id="cartModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Your Cart</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="cartItems">
-                        <!-- Cart items will be added here dynamically -->
+        <div class="modal-dialog" style="max-width: 500px;">
+            <div class="modal-content p-0" style="border-radius: 12px; overflow: hidden;">
+                <div class="order-container" style="box-shadow:none; max-width:100%; margin:0; padding:0;">
+                    <div class="order-header" style="padding: 20px 20px 0 20px;">
+                        <h1 style="font-size:1.2rem; margin-bottom:0;">Your Cart</h1>
+                        <p class="order-subtitle" style="font-size:0.95rem;">Review your selected items</p>
                     </div>
-                    <div class="text-end mt-3">
-                        <h5>Total: $<span id="cartTotal">0.00</span></h5>
+                    <div class="order-content" style="display: flex; flex-direction: row; gap: 16px; padding: 0 20px 20px 20px;">
+                        <div class="order-items" style="box-shadow:none; padding:0; min-width:180px;">
+                            <div id="cartItems"></div>
+                        </div>
+                        <div class="order-summary" style="box-shadow:none; min-width:150px; padding: 12px 10px;">
+                            <h2 style="font-size:1rem; margin-bottom:10px;">Order Summary</h2>
+                            <div class="summary-item" style="font-size:0.95rem;">
+                                <span>Subtotal</span>
+                                <span id="cartSubtotal">$0.00</span>
+                            </div>
+                            <div class="summary-item" style="font-size:0.95rem;">
+                                <span>Tax</span>
+                                <span id="cartTax">$0.00</span>
+                            </div>
+                            <div class="summary-item total" style="font-size:1.05rem;">
+                                <span>Total</span>
+                                <span id="cartTotal">$0.00</span>
+                            </div>
+                            <button type="button" class="btn-checkout mt-3 w-100" style="font-size:0.95rem; padding:8px 0;" onclick="checkout()">Checkout</button>
+                            <button type="button" class="btn btn-secondary w-100 mt-2" style="font-size:0.95rem; padding:8px 0;" data-bs-dismiss="modal">Continue Shopping</button>
+                        </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Continue Shopping</button>
-                    <button type="button" class="btn btn-success" onclick="checkout()">Checkout</button>
                 </div>
             </div>
         </div>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drinks - Restaurant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="menu.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">MakanYuk!</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="menu.html">Menu</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../order/order.html">Orders</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center">
+                    <a href="#" class="btn btn-light position-relative me-3" data-bs-toggle="modal" data-bs-target="#cartModal">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-badge">0</span>
+                    </a>
+                    <div class="dropdown">
+                        <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="../profil/profile.html">Profile</a></li>
+                            <li><a class="dropdown-item" href="#">Orders History</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="../login/login.html">Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="text-center mb-4">
+            <div class="btn-group" role="group">
+                <a href="menu.html" class="category-btn">All</a>
+                <a href="main-course.html" class="category-btn">Main Course</a>
+                <a href="appetizers.html" class="category-btn">Appetizers</a>
+                <a href="desserts.html" class="category-btn">Desserts</a>
+                <a href="drinks.html" class="category-btn active">Drinks</a>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Example Drink Item -->
+            <div class="col-md-4">
+                <div class="card menu-item">
+                    <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="Food Item">
+                    <div class="card-body">
+                        <h5 class="card-title">Fresh Juice</h5>
+                        <p class="card-text">Freshly squeezed orange juice</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="h5 mb-0">$4.99</span>
+                            <div class="input-group" style="max-width: 120px;">
+                                <button class="btn btn-outline-danger btn-sm minus-btn" data-name="Fresh Juice" data-price="4.99">-</button>
+                                <input type="number" min="0" value="0" class="form-control qty-input text-center" style="width:40px;">
+                                <button class="btn btn-outline-success btn-sm plus-btn" data-name="Fresh Juice" data-price="4.99">+</button>
+                            </div>
+                            <button class="btn btn-success ms-2 add-btn" data-name="Fresh Juice" data-price="4.99">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Add more drink items as needed -->
+        </div>
+    </div>
+
+    <!-- Cart Modal (same as in menu.html) -->
+    <!-- ... copy the cart modal code here ... -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="menu.js"></script>
+</body>
+</html> 

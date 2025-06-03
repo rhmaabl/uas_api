@@ -1,6 +1,10 @@
 let cart = [];
 let cartTotal = 0;
 
+function order() {
+    window.location.href = 'order.html';
+}
+
 // Attach event listeners after DOM is loaded
 window.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.menu-item').forEach(card => {
@@ -55,29 +59,77 @@ function removeFromCart(name) {
 function updateCartUI() {
     const cartItems = document.getElementById('cartItems');
     const cartBadge = document.querySelector('.cart-badge');
+    const cartSubtotalElement = document.getElementById('cartSubtotal');
+    const cartTaxElement = document.getElementById('cartTax');
     const cartTotalElement = document.getElementById('cartTotal');
 
-    cartTotal = 0;
+    let subtotal = 0;
     cartItems.innerHTML = cart.map(item => {
-        cartTotal += item.price * item.qty;
+        subtotal += item.price * item.qty;
         return `
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <span>${item.name} x${item.qty}</span>
-                <span>
-                    $${(item.price * item.qty).toFixed(2)}
-                    <button class="btn btn-sm btn-danger ms-2 remove-btn" data-name="${item.name}">Remove</button>
-                </span>
+            <div class="order-item" style="display:flex;align-items:center;gap:16px;padding:16px 0;border-bottom:1px solid #eee;">
+                <div class="item-image" style="width:60px;height:60px;border-radius:8px;overflow:hidden;background:#eee;display:flex;align-items:center;justify-content:center;">
+                    <img src="https://via.placeholder.com/60" alt="Food Item" style="width:100%;height:100%;object-fit:cover;">
+                </div>
+                <div class="item-details" style="flex:1;">
+                    <h3 style="font-size:1rem;margin-bottom:4px;">${item.name}</h3>
+                    <div class="item-price" style="font-weight:600;color:#548de2;">$${item.price.toFixed(2)}</div>
+                </div>
+                <div class="item-quantity" style="display:flex;align-items:center;gap:6px;">
+                    <button class="quantity-btn minus-cart" data-name="${item.name}">-</button>
+                    <input type="number" value="${item.qty}" min="1" max="10" style="width:40px;text-align:center;" data-name="${item.name}">
+                    <button class="quantity-btn plus-cart" data-name="${item.name}">+</button>
+                </div>
+                <button class="btn btn-sm btn-danger ms-2 remove-btn" data-name="${item.name}">Remove</button>
             </div>
         `;
     }).join('');
 
     cartBadge.textContent = cart.reduce((sum, item) => sum + item.qty, 0);
-    cartTotalElement.textContent = cartTotal.toFixed(2);
+    const tax = subtotal * 0.1;
+    const total = subtotal + tax;
+    cartSubtotalElement.textContent = `$${subtotal.toFixed(2)}`;
+    cartTaxElement.textContent = `$${tax.toFixed(2)}`;
+    cartTotalElement.textContent = `$${total.toFixed(2)}`;
 
     // Remove buttons
     document.querySelectorAll('.remove-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             removeFromCart(this.dataset.name);
+        });
+    });
+    // Quantity controls
+    document.querySelectorAll('.minus-cart').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const name = this.dataset.name;
+            const item = cart.find(i => i.name === name);
+            if (item && item.qty > 1) {
+                item.qty--;
+                updateCartUI();
+            }
+        });
+    });
+    document.querySelectorAll('.plus-cart').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const name = this.dataset.name;
+            const item = cart.find(i => i.name === name);
+            if (item && item.qty < 10) {
+                item.qty++;
+                updateCartUI();
+            }
+        });
+    });
+    document.querySelectorAll('.item-quantity input').forEach(input => {
+        input.addEventListener('change', function() {
+            const name = this.dataset.name;
+            let value = parseInt(this.value);
+            if (value < 1) value = 1;
+            if (value > 10) value = 10;
+            const item = cart.find(i => i.name === name);
+            if (item) {
+                item.qty = value;
+                updateCartUI();
+            }
         });
     });
 }
