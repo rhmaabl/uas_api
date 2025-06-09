@@ -12,42 +12,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // Cart state
     let cart = [];
     let cartTotal = 0;
+    let menuItems = [];
 
-    // Sample menu items data
-    const menuItems = [
-        {
-            id: 1,
-            name: 'Classic Burger',
-            category: 'main-course',
-            price: 12.99,
-            description: 'Juicy beef patty with fresh vegetables and special sauce',
-            image: '../images/burger.jpg'
-        },
-        {
-            id: 2,
-            name: 'Caesar Salad',
-            category: 'appetizers',
-            price: 8.99,
-            description: 'Fresh romaine lettuce with Caesar dressing and croutons',
-            image: '../images/salad.jpg'
-        },
-        {
-            id: 3,
-            name: 'Chocolate Cake',
-            category: 'desserts',
-            price: 6.99,
-            description: 'Rich chocolate cake with ganache frosting',
-            image: '../images/cake.jpg'
-        },
-        {
-            id: 4,
-            name: 'Fresh Juice',
-            category: 'beverages',
-            price: 4.99,
-            description: 'Freshly squeezed orange juice',
-            image: '../images/juice.jpg'
+    // API Configuration
+    const API_BASE_URL = 'http://localhost:3000/api';
+
+    // Fetch menu items from API
+    async function fetchMenuItems() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/menu`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch menu items');
+            }
+            menuItems = await response.json();
+            displayMenuItems();
+        } catch (error) {
+            console.error('Error fetching menu items:', error);
+            alert('Failed to load menu items. Please try again later.');
         }
-    ];
+    }
 
     // Mobile Navigation Toggle
     hamburger.addEventListener('click', () => {
@@ -67,9 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Category Filter
     categoryButtons.forEach(button => {
         button.addEventListener('click', () => {
-            // Remove active class from all buttons
             categoryButtons.forEach(btn => btn.classList.remove('active'));
-            // Add active class to clicked button
             button.classList.add('active');
             
             const category = button.dataset.category;
@@ -102,7 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
             menuGrid.appendChild(menuItem);
         });
 
-        // Add event listeners to new buttons
         document.querySelectorAll('.add-to-cart').forEach(button => {
             button.addEventListener('click', (e) => {
                 const itemId = parseInt(e.target.dataset.id);
@@ -159,11 +139,9 @@ document.addEventListener('DOMContentLoaded', () => {
             cartItems.appendChild(cartItem);
         });
 
-        // Update cart count and total
         cartCount.textContent = cart.reduce((total, item) => total + item.quantity, 0);
         totalAmount.textContent = `$${cartTotal.toFixed(2)}`;
 
-        // Add event listeners to quantity buttons
         document.querySelectorAll('.quantity-btn').forEach(button => {
             button.addEventListener('click', (e) => {
                 const itemId = parseInt(e.target.dataset.id);
@@ -188,18 +166,68 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Submit Order
+    async function submitOrder() {
+        try {
+            const orderData = {
+                items: cart.map(item => ({
+                    menuId: item.id,
+                    quantity: item.quantity,
+                    price: item.price
+                })),
+                totalAmount: cartTotal
+            };
+
+            const response = await fetch(`${API_BASE_URL}/orders`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(orderData)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to submit order');
+            }
+
+            const result = await response.json();
+            alert('Order submitted successfully!');
+            cart = [];
+            updateCart();
+            cartSidebar.classList.remove('active');
+        } catch (error) {
+            console.error('Error submitting order:', error);
+            alert('Failed to submit order. Please try again later.');
+        }
+    }
+
     // Contact Form Submission
-    contactForm.addEventListener('submit', (e) => {
+    contactForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(contactForm);
         const data = Object.fromEntries(formData.entries());
         
-        // Here you would typically send the data to a server
-        console.log('Contact form submission:', data);
-        alert('Thank you for your message! We will get back to you soon.');
-        contactForm.reset();
+        try {
+            const response = await fetch(`${API_BASE_URL}/contact`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to submit contact form');
+            }
+
+            alert('Thank you for your message! We will get back to you soon.');
+            contactForm.reset();
+        } catch (error) {
+            console.error('Error submitting contact form:', error);
+            alert('Failed to submit message. Please try again later.');
+        }
     });
 
     // Initialize
-    displayMenuItems();
+    fetchMenuItems();
 }); 

@@ -56,6 +56,21 @@ function removeFromCart(name) {
     updateCartUI();
 }
 
+// Currency formatter for IDR
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(amount);
+}
+
+// Convert USD to IDR (assuming 1 USD = 15000 IDR)
+function convertToIDR(usdAmount) {
+    return usdAmount * 15000;
+}
+
 function updateCartUI() {
     const cartItems = document.getElementById('cartItems');
     const cartBadge = document.querySelector('.cart-badge');
@@ -65,7 +80,8 @@ function updateCartUI() {
 
     let subtotal = 0;
     cartItems.innerHTML = cart.map(item => {
-        subtotal += item.price * item.qty;
+        const priceInIDR = convertToIDR(item.price);
+        subtotal += priceInIDR * item.qty;
         return `
             <div class="order-item" style="display:flex;align-items:center;gap:16px;padding:16px 0;border-bottom:1px solid #eee;">
                 <div class="item-image" style="width:60px;height:60px;border-radius:8px;overflow:hidden;background:#eee;display:flex;align-items:center;justify-content:center;">
@@ -73,7 +89,7 @@ function updateCartUI() {
                 </div>
                 <div class="item-details" style="flex:1;">
                     <h3 style="font-size:1rem;margin-bottom:4px;">${item.name}</h3>
-                    <div class="item-price" style="font-weight:600;color:#548de2;">$${item.price.toFixed(2)}</div>
+                    <div class="item-price" style="font-weight:600;color:#548de2;">${formatCurrency(priceInIDR)}</div>
                 </div>
                 <div class="item-quantity" style="display:flex;align-items:center;gap:6px;">
                     <button class="quantity-btn minus-cart" data-name="${item.name}">-</button>
@@ -88,9 +104,9 @@ function updateCartUI() {
     cartBadge.textContent = cart.reduce((sum, item) => sum + item.qty, 0);
     const tax = subtotal * 0.1;
     const total = subtotal + tax;
-    cartSubtotalElement.textContent = `$${subtotal.toFixed(2)}`;
-    cartTaxElement.textContent = `$${tax.toFixed(2)}`;
-    cartTotalElement.textContent = `$${total.toFixed(2)}`;
+    cartSubtotalElement.textContent = formatCurrency(subtotal);
+    cartTaxElement.textContent = formatCurrency(tax);
+    cartTotalElement.textContent = formatCurrency(total);
 
     // Remove buttons
     document.querySelectorAll('.remove-btn').forEach(btn => {

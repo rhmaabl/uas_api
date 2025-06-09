@@ -56,7 +56,7 @@
                             <div class="card stat-card">
                                 <div class="card-body">
                                     <h5 class="card-title">Today's Revenue</h5>
-                                    <h2 class="mb-0">$1,250</h2>
+                                    <h2 class="mb-0">Rp 18.750.000</h2>
                                 </div>
                             </div>
                         </div>
@@ -96,12 +96,12 @@
                                             <th>Action</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody id="ordersTableBody">
                                         <tr>
                                             <td>#12345</td>
                                             <td>John Doe</td>
                                             <td>2x Grilled Salmon, 1x Caesar Salad</td>
-                                            <td>$62.97</td>
+                                            <td>Rp 944.550</td>
                                             <td><span class="badge bg-warning">Pending</span></td>
                                             <td>
                                                 <button class="btn btn-sm btn-success">Complete</button>
@@ -112,7 +112,7 @@
                                             <td>#12344</td>
                                             <td>Jane Smith</td>
                                             <td>1x Beef Steak, 2x Drinks</td>
-                                            <td>$45.98</td>
+                                            <td>Rp 689.700</td>
                                             <td><span class="badge bg-success">Completed</span></td>
                                             <td>
                                                 <button class="btn btn-sm btn-secondary" disabled>Complete</button>
@@ -141,10 +141,10 @@
                                 <table class="table">
                                     <thead>
                                         <tr>
-                                            <th>Image</th>
-                                            <th>Name</th>
-                                            <th>Category</th>
-                                            <th>Price</th>
+                                            <th>Gambar</th>
+                                            <th>Nama</th>
+                                            <th>Kategori</th>
+                                            <th>Harga</th>
                                             <th>Status</th>
                                             <th>Action</th>
                                         </tr>
@@ -154,7 +154,7 @@
                                             <td><img src="https://via.placeholder.com/50" class="rounded" alt="Food"></td>
                                             <td>Grilled Salmon</td>
                                             <td>Main Course</td>
-                                            <td>$24.99</td>
+                                            <td>Rp 374.850</td>
                                             <td><span class="badge bg-success">Available</span></td>
                                             <td>
                                                 <button class="btn btn-sm btn-primary">Edit</button>
@@ -180,9 +180,9 @@
                                 <table class="table">
                                     <thead>
                                         <tr>
-                                            <th>Order ID</th>
+                                            <th>ID Order</th>
                                             <th>Customer</th>
-                                            <th>Items</th>
+                                            <th>Jumlah</th>
                                             <th>Total</th>
                                             <th>Status</th>
                                             <th>Action</th>
@@ -193,7 +193,7 @@
                                             <td>#1001</td>
                                             <td>John Doe</td>
                                             <td>2x Grilled Salmon, 1x Caesar Salad</td>
-                                            <td>$62.97</td>
+                                            <td>Rp 944.550</td>
                                             <td><span class="badge bg-warning">Pending</span></td>
                                             <td>
                                                 <button class="btn btn-sm btn-success order-complete">Complete</button>
@@ -204,7 +204,7 @@
                                             <td>#1002</td>
                                             <td>Jane Smith</td>
                                             <td>1x Beef Steak, 2x Drinks</td>
-                                            <td>$45.98</td>
+                                            <td>Rp 689.700</td>
                                             <td><span class="badge bg-success">Completed</span></td>
                                             <td>
                                                 <button class="btn btn-sm btn-secondary" disabled>Complete</button>
@@ -230,10 +230,10 @@
                                 <table class="table">
                                     <thead>
                                         <tr>
-                                            <th>Payment ID</th>
-                                            <th>Order ID</th>
+                                            <th>ID Payment</th>
+                                            <th>ID Order</th>
                                             <th>Customer</th>
-                                            <th>Amount</th>
+                                            <th>Total</th>
                                             <th>Status</th>
                                             <th>Action</th>
                                         </tr>
@@ -243,7 +243,7 @@
                                             <td>#P1001</td>
                                             <td>#1001</td>
                                             <td>John Doe</td>
-                                            <td>$62.97</td>
+                                            <td>Rp 944.550</td>
                                             <td><span class="badge bg-warning">Pending</span></td>
                                             <td>
                                                 <button class="btn btn-sm btn-success payment-complete">Mark as Paid</button>
@@ -253,7 +253,7 @@
                                             <td>#P1002</td>
                                             <td>#1002</td>
                                             <td>Jane Smith</td>
-                                            <td>$45.98</td>
+                                            <td>Rp 689.700</td>
                                             <td><span class="badge bg-success">Paid</span></td>
                                             <td>
                                                 <button class="btn btn-sm btn-secondary" disabled>Mark as Paid</button>
@@ -268,18 +268,18 @@
 
                 <!-- Users Management Section -->
                 <div id="users" class="d-none">
-                    <h2 class="mb-4">Users Management</h2>
+                    <h2 class="mb-4">User Management</h2>
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="mb-0">Users List</h5>
+                            <h5 class="mb-0">User List</h5>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table">
                                     <thead>
                                         <tr>
-                                            <th>User ID</th>
-                                            <th>Name</th>
+                                            <th>ID User</th>
+                                            <th>Nama</th>
                                             <th>Email</th>
                                             <th>Role</th>
                                             <th>Status</th>
@@ -343,7 +343,8 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Price</label>
-                            <input type="number" class="form-control" step="0.01" required>
+                            <input type="number" class="form-control" step="100" min="0" required placeholder="Masukkan harga dalam Rupiah">
+                            <small class="text-muted">Masukkan harga dalam Rupiah (contoh: 150000)</small>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Description</label>
