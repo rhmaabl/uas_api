@@ -23,6 +23,10 @@ const OrderItem = sequelize.define('order_item', {
     type: DataTypes.DECIMAL(10,2),
     allowNull: false,
   },
+  subtotal: {
+    type: DataTypes.DECIMAL(10,2),
+    allowNull: false,
+  },
 }, {
   tableName: 'order_item',
   timestamps: false,
