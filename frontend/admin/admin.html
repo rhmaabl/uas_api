@@ -22,9 +22,6 @@
                         <a class="nav-link" href="#menu">
                             <i class="fas fa-utensils"></i> Menu Management
                         </a>
-                        <a class="nav-link" href="#orders">
-                            <i class="fas fa-shopping-cart"></i> Orders
-                        </a>
                         <a class="nav-link" href="#payments">
                             <i class="fas fa-credit-card"></i> Payments
                         </a>
@@ -90,35 +87,16 @@
                                         <tr>
                                             <th>Order ID</th>
                                             <th>Customer</th>
-                                            <th>Items</th>
+                                            <th>Menu</th>
+                                            <th>Price</th>
+                                            <th>Quantity</th>
+                                            <th>Subtotal</th>
                                             <th>Total</th>
                                             <th>Status</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody id="ordersTableBody">
-                                        <tr>
-                                            <td>#12345</td>
-                                            <td>John Doe</td>
-                                            <td>2x Grilled Salmon, 1x Caesar Salad</td>
-                                            <td>Rp 944.550</td>
-                                            <td><span class="badge bg-warning">Pending</span></td>
-                                            <td>
-                                                <button class="btn btn-sm btn-success">Complete</button>
-                                                <button class="btn btn-sm btn-danger">Cancel</button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>#12344</td>
-                                            <td>Jane Smith</td>
-                                            <td>1x Beef Steak, 2x Drinks</td>
-                                            <td>Rp 689.700</td>
-                                            <td><span class="badge bg-success">Completed</span></td>
-                                            <td>
-                                                <button class="btn btn-sm btn-secondary" disabled>Complete</button>
-                                                <button class="btn btn-sm btn-danger">Cancel</button>
-                                            </td>
-                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -141,76 +119,15 @@
                                 <table class="table">
                                     <thead>
                                         <tr>
-                                            <th>Gambar</th>
-                                            <th>Nama</th>
-                                            <th>Kategori</th>
-                                            <th>Harga</th>
-                                            <th>Status</th>
+                                            <th>Image</th>
+                                            <th>Menu</th>
+                                            <th>Category</th>
+                                            <th>Price</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td><img src="https://via.placeholder.com/50" class="rounded" alt="Food"></td>
-                                            <td>Grilled Salmon</td>
-                                            <td>Main Course</td>
-                                            <td>Rp 374.850</td>
-                                            <td><span class="badge bg-success">Available</span></td>
-                                            <td>
-                                                <button class="btn btn-sm btn-primary">Edit</button>
-                                                <button class="btn btn-sm btn-danger">Delete</button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Orders Management Section -->
-                <div id="orders" class="d-none">
-                    <h2 class="mb-4">Orders Management</h2>
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0">Orders List</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>ID Order</th>
-                                            <th>Customer</th>
-                                            <th>Jumlah</th>
-                                            <th>Total</th>
-                                            <th>Status</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="ordersTableBody">
-                                        <tr>
-                                            <td>#1001</td>
-                                            <td>John Doe</td>
-                                            <td>2x Grilled Salmon, 1x Caesar Salad</td>
-                                            <td>Rp 944.550</td>
-                                            <td><span class="badge bg-warning">Pending</span></td>
-                                            <td>
-                                                <button class="btn btn-sm btn-success order-complete">Complete</button>
-                                                <button class="btn btn-sm btn-danger order-cancel">Cancel</button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>#1002</td>
-                                            <td>Jane Smith</td>
-                                            <td>1x Beef Steak, 2x Drinks</td>
-                                            <td>Rp 689.700</td>
-                                            <td><span class="badge bg-success">Completed</span></td>
-                                            <td>
-                                                <button class="btn btn-sm btn-secondary" disabled>Complete</button>
-                                                <button class="btn btn-sm btn-danger order-cancel">Cancel</button>
-                                            </td>
-                                        </tr>
+                                        <!-- Menu items will be dynamically loaded here -->
                                     </tbody>
                                 </table>
                             </div>
@@ -234,6 +151,7 @@
                                             <th>ID Order</th>
                                             <th>Customer</th>
                                             <th>Total</th>
+                                            <th>Payment Method</th>
                                             <th>Status</th>
                                             <th>Action</th>
                                         </tr>
@@ -244,6 +162,7 @@
                                             <td>#1001</td>
                                             <td>John Doe</td>
                                             <td>Rp 944.550</td>
+                                            <td>Cash</td>
                                             <td><span class="badge bg-warning">Pending</span></td>
                                             <td>
                                                 <button class="btn btn-sm btn-success payment-complete">Mark as Paid</button>
@@ -329,30 +248,26 @@
                     <form id="addItemForm">
                         <div class="mb-3">
                             <label class="form-label">Item Name</label>
-                            <input type="text" class="form-control" required>
+                            <input type="text" class="form-control" name="nama" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Category</label>
-                            <select class="form-select" required>
+                            <select class="form-select" name="id_kategori" required>
                                 <option value="">Select Category</option>
-                                <option value="main">Main Course</option>
-                                <option value="appetizer">Appetizer</option>
-                                <option value="dessert">Dessert</option>
-                                <option value="drink">Drink</option>
+                                <option value="1">Main Course</option>
+                                <option value="2">Dessert</option>
+                                <option value="3">Drink</option>
                             </select>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Price</label>
-                            <input type="number" class="form-control" step="100" min="0" required placeholder="Masukkan harga dalam Rupiah">
+                            <input type="number" class="form-control" name="harga" step="100" min="0" required placeholder="Masukkan harga dalam Rupiah">
                             <small class="text-muted">Masukkan harga dalam Rupiah (contoh: 150000)</small>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Description</label>
-                            <textarea class="form-control" rows="3" required></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Image</label>
-                            <input type="file" class="form-control" accept="image/*" required>
+                            <label class="form-label">Image URL</label>
+                            <input type="text" class="form-control" name="gambar" required placeholder="Enter image URL">
+                            <small class="text-muted">Enter the URL of the menu item image</small>
                         </div>
                     </form>
                 </div>
