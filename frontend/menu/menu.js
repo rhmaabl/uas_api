@@ -1,12 +1,115 @@
 let cart = [];
 let cartTotal = 0;
+let menuItems = [];
+let categories = [];
+
+// API Configuration
+const API_BASE_URL = 'http://localhost:3000/api';
 
 function order() {
     window.location.href = 'order.html';
 }
 
-// Attach event listeners after DOM is loaded
-window.addEventListener('DOMContentLoaded', () => {
+// Fetch menu items from backend
+async function fetchMenuItems() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/menu`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        menuItems = data;
+        displayMenuItems();
+    } catch (error) {
+        console.error('Error fetching menu items:', error);
+        showError('Failed to load menu items. Please try again later.');
+    }
+}
+
+// Fetch categories from backend
+async function fetchCategories() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/kategori`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        categories = data;
+        setupCategoryButtons();
+    } catch (error) {
+        console.error('Error fetching categories:', error);
+        // Continue without categories if they fail to load
+    }
+}
+
+// Display menu items dynamically
+function displayMenuItems(filteredItems = null) {
+    const menuContainer = document.querySelector('.row.g-4');
+    const itemsToDisplay = filteredItems || menuItems;
+    
+    if (itemsToDisplay.length === 0) {
+        menuContainer.innerHTML = '<div class="col-12 text-center"><p>No menu items available.</p></div>';
+        return;
+    }
+
+    menuContainer.innerHTML = itemsToDisplay.map(item => `
+        <div class="col-md-4">
+            <div class="card menu-item">
+                <img src="${item.gambar || 'https://via.placeholder.com/300x200'}" class="card-img-top" alt="${item.nama}" onerror="this.src='https://via.placeholder.com/300x200'">
+                <div class="card-body">
+                    <h5 class="card-title">${item.nama}</h5>
+                    <p class="card-text">${item.kategori ? item.kategori.nama_kategori : 'No category'}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="h5 mb-0">${formatCurrency(item.harga)}</span>
+                        <div class="input-group" style="max-width: 120px;">
+                            <button class="btn btn-outline-danger btn-sm minus-btn" data-id="${item.id}" data-name="${item.nama}" data-price="${item.harga}">-</button>
+                            <input type="number" min="0" value="0" class="form-control qty-input text-center" style="width:40px;">
+                            <button class="btn btn-outline-success btn-sm plus-btn" data-id="${item.id}" data-name="${item.nama}" data-price="${item.harga}">+</button>
+                        </div>
+                        <button class="btn btn-success ms-2 add-btn" data-id="${item.id}" data-name="${item.nama}" data-price="${item.harga}">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    // Re-attach event listeners
+    attachMenuEventListeners();
+}
+
+// Setup category filter buttons
+function setupCategoryButtons() {
+    const categoryContainer = document.querySelector('.btn-group');
+    if (categories.length > 0) {
+        const categoryButtons = categories.map(category => 
+            `<button type="button" class="category-btn" data-category-id="${category.id_kategori}">${category.nama_kategori}</button>`
+        ).join('');
+        
+        categoryContainer.innerHTML = `
+            <button type="button" class="category-btn active" data-category-id="all">All</button>
+            ${categoryButtons}
+        `;
+    }
+    
+    // Attach category filter event listeners
+    document.querySelectorAll('.category-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            const categoryId = this.dataset.categoryId;
+            if (categoryId === 'all') {
+                displayMenuItems();
+            } else {
+                const filteredItems = menuItems.filter(item => item.id_kategori == categoryId);
+                displayMenuItems(filteredItems);
+            }
+        });
+    });
+}
+
+// Attach event listeners to menu items
+function attachMenuEventListeners() {
     document.querySelectorAll('.menu-item').forEach(card => {
         const minusBtn = card.querySelector('.minus-btn');
         const plusBtn = card.querySelector('.plus-btn');
@@ -24,35 +127,45 @@ window.addEventListener('DOMContentLoaded', () => {
         });
 
         addBtn.addEventListener('click', () => {
+            const id = addBtn.dataset.id;
             const name = addBtn.dataset.name;
             const price = parseFloat(addBtn.dataset.price);
             const qty = parseInt(qtyInput.value) || 1;
-            addToCart(name, price, qty);
+            addToCart(id, name, price, qty);
         });
     });
+}
 
-    // Category filter functionality
-    document.querySelectorAll('.category-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-            // Here you would typically filter the menu items based on category
-        });
-    });
+// Show loading state
+function showLoading() {
+    const menuContainer = document.querySelector('.row.g-4');
+    menuContainer.innerHTML = '<div class="col-12 text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Loading menu items...</p></div>';
+}
+
+// Show error message
+function showError(message) {
+    const menuContainer = document.querySelector('.row.g-4');
+    menuContainer.innerHTML = `<div class="col-12 text-center"><div class="alert alert-danger" role="alert">${message}</div></div>`;
+}
+
+// Attach event listeners after DOM is loaded
+window.addEventListener('DOMContentLoaded', async () => {
+    showLoading();
+    await Promise.all([fetchMenuItems(), fetchCategories()]);
 });
 
-function addToCart(name, price, qty) {
-    const existing = cart.find(item => item.name === name);
+function addToCart(id, name, price, qty) {
+    const existing = cart.find(item => item.id === id);
     if (existing) {
         existing.qty += qty;
     } else {
-        cart.push({ name, price, qty });
+        cart.push({ id, name, price, qty });
     }
     updateCartUI();
 }
 
-function removeFromCart(name) {
-    cart = cart.filter(item => item.name !== name);
+function removeFromCart(id) {
+    cart = cart.filter(item => item.id !== id);
     updateCartUI();
 }
 
@@ -66,11 +179,6 @@ function formatCurrency(amount) {
     }).format(amount);
 }
 
-// Convert USD to IDR (assuming 1 USD = 15000 IDR)
-function convertToIDR(usdAmount) {
-    return usdAmount * 15000;
-}
-
 function updateCartUI() {
     const cartItems = document.getElementById('cartItems');
     const cartBadge = document.querySelector('.cart-badge');
@@ -80,8 +188,7 @@ function updateCartUI() {
 
     let subtotal = 0;
     cartItems.innerHTML = cart.map(item => {
-        const priceInIDR = convertToIDR(item.price);
-        subtotal += priceInIDR * item.qty;
+        subtotal += item.price * item.qty;
         return `
             <div class="order-item" style="display:flex;align-items:center;gap:16px;padding:16px 0;border-bottom:1px solid #eee;">
                 <div class="item-image" style="width:60px;height:60px;border-radius:8px;overflow:hidden;background:#eee;display:flex;align-items:center;justify-content:center;">
@@ -89,14 +196,14 @@ function updateCartUI() {
                 </div>
                 <div class="item-details" style="flex:1;">
                     <h3 style="font-size:1rem;margin-bottom:4px;">${item.name}</h3>
-                    <div class="item-price" style="font-weight:600;color:#548de2;">${formatCurrency(priceInIDR)}</div>
+                    <div class="item-price" style="font-weight:600;color:#548de2;">${formatCurrency(item.price)}</div>
                 </div>
                 <div class="item-quantity" style="display:flex;align-items:center;gap:6px;">
-                    <button class="quantity-btn minus-cart" data-name="${item.name}">-</button>
-                    <input type="number" value="${item.qty}" min="1" max="10" style="width:40px;text-align:center;" data-name="${item.name}">
-                    <button class="quantity-btn plus-cart" data-name="${item.name}">+</button>
+                    <button class="quantity-btn minus-cart" data-id="${item.id}">-</button>
+                    <input type="number" value="${item.qty}" min="1" max="10" style="width:40px;text-align:center;" data-id="${item.id}">
+                    <button class="quantity-btn plus-cart" data-id="${item.id}">+</button>
                 </div>
-                <button class="btn btn-sm btn-danger ms-2 remove-btn" data-name="${item.name}">Remove</button>
+                <button class="btn btn-sm btn-danger ms-2 remove-btn" data-id="${item.id}">Remove</button>
             </div>
         `;
     }).join('');
@@ -111,37 +218,40 @@ function updateCartUI() {
     // Remove buttons
     document.querySelectorAll('.remove-btn').forEach(btn => {
         btn.addEventListener('click', function() {
-            removeFromCart(this.dataset.name);
+            removeFromCart(this.dataset.id);
         });
     });
+    
     // Quantity controls
     document.querySelectorAll('.minus-cart').forEach(btn => {
         btn.addEventListener('click', function() {
-            const name = this.dataset.name;
-            const item = cart.find(i => i.name === name);
+            const id = this.dataset.id;
+            const item = cart.find(i => i.id === id);
             if (item && item.qty > 1) {
                 item.qty--;
                 updateCartUI();
             }
         });
     });
+    
     document.querySelectorAll('.plus-cart').forEach(btn => {
         btn.addEventListener('click', function() {
-            const name = this.dataset.name;
-            const item = cart.find(i => i.name === name);
+            const id = this.dataset.id;
+            const item = cart.find(i => i.id === id);
             if (item && item.qty < 10) {
                 item.qty++;
                 updateCartUI();
             }
         });
     });
+    
     document.querySelectorAll('.item-quantity input').forEach(input => {
         input.addEventListener('change', function() {
-            const name = this.dataset.name;
+            const id = this.dataset.id;
             let value = parseInt(this.value);
             if (value < 1) value = 1;
             if (value > 10) value = 10;
-            const item = cart.find(i => i.name === name);
+            const item = cart.find(i => i.id === id);
             if (item) {
                 item.qty = value;
                 updateCartUI();
@@ -150,15 +260,55 @@ function updateCartUI() {
     });
 }
 
-function checkout() {
+async function checkout() {
     if (cart.length === 0) {
         alert('Your cart is empty!');
         return;
     }
-    alert('Order placed successfully!');
-    cart = [];
-    cartTotal = 0;
-    updateCartUI();
-    const cartModal = bootstrap.Modal.getInstance(document.getElementById('cartModal'));
-    cartModal.hide();
+    
+    try {
+        // Prepare order data for backend
+        const orderData = {
+            id_user: 1, // You might want to get this from user session/authentication
+            items: cart.map(item => ({
+                id_menu: item.id,
+                jumlah: item.qty,
+                harga_satuan: item.price
+            }))
+        };
+
+        // Send order to backend
+        const response = await fetch(`${API_BASE_URL}/orders`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(orderData)
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const createdOrder = await response.json();
+        
+        // Show success message with order ID
+        alert(`Order placed successfully! Order #${createdOrder.id_order}`);
+        
+        // Clear cart
+        cart = [];
+        cartTotal = 0;
+        updateCartUI();
+        
+        // Close cart modal
+        const cartModal = bootstrap.Modal.getInstance(document.getElementById('cartModal'));
+        cartModal.hide();
+        
+        // Optionally redirect to order history
+        // window.location.href = '../order/order.html';
+        
+    } catch (error) {
+        console.error('Error during checkout:', error);
+        alert('Failed to place order. Please try again.');
+    }
 }

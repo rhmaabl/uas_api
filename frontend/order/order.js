@@ -1,70 +1,248 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize quantity controls
-    const quantityInputs = document.querySelectorAll('.item-quantity input');
-    const minusButtons = document.querySelectorAll('.quantity-btn.minus');
-    const plusButtons = document.querySelectorAll('.quantity-btn.plus');
+// API Configuration
+const API_BASE_URL = 'http://localhost:3000/api';
 
-    // Add event listeners for quantity controls
-    minusButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const input = this.nextElementSibling;
-            const currentValue = parseInt(input.value);
-            if (currentValue > 1) {
-                input.value = currentValue - 1;
-                updateOrderSummary();
-            }
-        });
+// Global variables
+let orders = [];
+
+// Currency formatter for IDR
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(amount);
+}
+
+// Format date
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('id-ID', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
     });
+}
 
-    plusButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const input = this.previousElementSibling;
-            const currentValue = parseInt(input.value);
-            if (currentValue < 10) {
-                input.value = currentValue + 1;
-                updateOrderSummary();
-            }
-        });
-    });
+// Get status badge class
+function getStatusBadgeClass(status) {
+    switch (status) {
+        case 'pending':
+            return 'bg-warning text-dark';
+        case 'diproses':
+            return 'bg-info';
+        case 'selesai':
+            return 'bg-success';
+        case 'dibatalkan':
+            return 'bg-danger';
+        default:
+            return 'bg-secondary';
+    }
+}
 
-    quantityInputs.forEach(input => {
-        input.addEventListener('change', function() {
-            let value = parseInt(this.value);
-            if (value < 1) this.value = 1;
-            if (value > 10) this.value = 10;
-            updateOrderSummary();
-        });
-    });
+// Get status display text
+function getStatusDisplayText(status) {
+    switch (status) {
+        case 'pending':
+            return 'Pending';
+        case 'diproses':
+            return 'Processing';
+        case 'selesai':
+            return 'Completed';
+        case 'dibatalkan':
+            return 'Cancelled';
+        default:
+            return status;
+    }
+}
 
-    // Function to update order summary
-    function updateOrderSummary() {
-        let subtotal = 0;
-        const items = document.querySelectorAll('.order-item');
+// Fetch orders from backend
+async function fetchOrders() {
+    try {
+        showLoading();
+        const response = await fetch(`${API_BASE_URL}/orders`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        orders = data;
+        displayOrders();
+    } catch (error) {
+        console.error('Error fetching orders:', error);
+        showError('Failed to load order history. Please try again later.');
+    }
+}
 
-        items.forEach(item => {
-            const price = parseFloat(item.querySelector('.item-price').textContent.replace('$', ''));
-            const quantity = parseInt(item.querySelector('.item-quantity input').value);
-            subtotal += price * quantity;
-        });
-
-        const tax = subtotal * 0.1; // 10% tax
-        const total = subtotal + tax;
-
-        // Update summary values
-        document.querySelector('.summary-item:nth-child(2) span:last-child').textContent = `$${subtotal.toFixed(2)}`;
-        document.querySelector('.summary-item:nth-child(3) span:last-child').textContent = `$${tax.toFixed(2)}`;
-        document.querySelector('.summary-item.total span:last-child').textContent = `$${total.toFixed(2)}`;
+// Display orders
+function displayOrders() {
+    const orderContainer = document.querySelector('.order-history-list');
+    
+    if (orders.length === 0) {
+        orderContainer.innerHTML = `
+            <div class="text-center py-5">
+                <i class="fas fa-shopping-bag fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No orders found</h4>
+                <p class="text-muted">You haven't placed any orders yet.</p>
+                <a href="../menu/menu.html" class="btn btn-primary">Browse Menu</a>
+            </div>
+        `;
+        return;
     }
 
-    // Initialize order summary
-    updateOrderSummary();
+    orderContainer.innerHTML = orders.map(order => {
+        const orderItems = order.order_items || [];
+        const itemsList = orderItems.map(item => {
+            const menuName = item.menu ? item.menu.nama : 'Unknown Item';
+            return `<li>${menuName} x${item.jumlah} - ${formatCurrency(item.harga_satuan)}</li>`;
+        }).join('');
 
-    // Checkout button functionality
-    const checkoutButton = document.querySelector('.btn-checkout');
-    checkoutButton.addEventListener('click', function() {
-        // Here you can add the checkout logic
-        alert('Proceeding to checkout...');
-        // You can redirect to a checkout page or show a modal
-    });
+        return `
+            <div class="card mb-4 shadow-sm order-history-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <span class="fw-bold">Order #${order.id_order}</span>
+                            <span class="text-muted ms-3">
+                                <i class="fa fa-calendar-alt"></i> ${formatDate(order.created_at)}
+                            </span>
+                        </div>
+                        <span class="badge ${getStatusBadgeClass(order.status)}">
+                            ${getStatusDisplayText(order.status)}
+                        </span>
+                    </div>
+                    <ul class="list-unstyled mb-2">
+                        ${itemsList}
+                    </ul>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold">Total: ${formatCurrency(order.total)}</span>
+                        <button class="btn btn-outline-primary btn-sm" onclick="viewOrderDetails(${order.id_order})">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// View order details
+async function viewOrderDetails(orderId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/orders/${orderId}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const order = await response.json();
+        showOrderDetailsModal(order);
+    } catch (error) {
+        console.error('Error fetching order details:', error);
+        alert('Failed to load order details. Please try again.');
+    }
+}
+
+// Show order details modal
+function showOrderDetailsModal(order) {
+    const orderItems = order.order_items || [];
+    const itemsList = orderItems.map(item => {
+        const menuName = item.menu ? item.menu.nama : 'Unknown Item';
+        return `
+            <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                <div>
+                    <h6 class="mb-0">${menuName}</h6>
+                    <small class="text-muted">Quantity: ${item.jumlah}</small>
+                </div>
+                <div class="text-end">
+                    <div>${formatCurrency(item.harga_satuan)} each</div>
+                    <div class="fw-bold">${formatCurrency(item.subtotal)}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    const modalHTML = `
+        <div class="modal fade" id="orderDetailsModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Order #${order.id_order} Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong>Order Date:</strong><br>
+                                ${formatDate(order.created_at)}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Status:</strong><br>
+                                <span class="badge ${getStatusBadgeClass(order.status)}">
+                                    ${getStatusDisplayText(order.status)}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Order Items:</strong>
+                            <div class="mt-2">
+                                ${itemsList}
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <h5>Total: ${formatCurrency(order.total)}</h5>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Remove existing modal if any
+    const existingModal = document.getElementById('orderDetailsModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    // Add modal to body
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
+    modal.show();
+}
+
+// Show loading state
+function showLoading() {
+    const orderContainer = document.querySelector('.order-history-list');
+    orderContainer.innerHTML = `
+        <div class="text-center py-5">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading order history...</p>
+        </div>
+    `;
+}
+
+// Show error message
+function showError(message) {
+    const orderContainer = document.querySelector('.order-history-list');
+    orderContainer.innerHTML = `
+        <div class="text-center py-5">
+            <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                ${message}
+            </div>
+            <button class="btn btn-primary" onclick="fetchOrders()">Try Again</button>
+        </div>
+    `;
+}
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    fetchOrders();
 }); 
 

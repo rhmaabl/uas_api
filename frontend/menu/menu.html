@@ -45,8 +45,26 @@
         </div>
     </nav>
 
-    <div class="container">
-        <div class="text-center mb-4">
+    <!-- Hero Header with Background Image -->
+    <header class="hero-header">
+        <div class="hero-overlay">
+            <div class="container">
+                <div class="hero-content text-center">
+                    <h1 class="hero-title">Welcome to MakanYuk!</h1>
+                    <p class="hero-subtitle">Discover our delicious menu and place your order today</p>
+                    <div class="hero-buttons">
+                        <a href="#menu-section" class="btn btn-primary btn-lg me-3">View Menu</a>
+                        <a href="../order/order.html" class="btn btn-outline-light btn-lg">Order History</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container" id="menu-section">
+        <div class="text-center mb-5">
+            <h2 class="section-title mb-4">Our Menu</h2>
+            <p class="section-subtitle mb-4">Choose from our delicious selection of dishes</p>
             <div class="btn-group" role="group">
                 <button type="button" class="category-btn active">All</button>
                 <button type="button" class="category-btn">Main Course</button>
@@ -56,64 +74,12 @@
         </div>
 
         <div class="row g-4">
-            <!-- Menu Item 1 -->
-            <div class="col-md-4">
-                <div class="card menu-item">
-                    <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="Food Item">
-                    <div class="card-body">
-                        <h5 class="card-title">Grilled Salmon</h5>
-                        <p class="card-text">Fresh salmon with herbs and lemon</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="h5 mb-0">Rp 374.850</span>
-                            <div class="input-group" style="max-width: 120px;">
-                                <button class="btn btn-outline-danger btn-sm minus-btn" data-name="Grilled Salmon" data-price="24.99">-</button>
-                                <input type="number" min="0" value="0" class="form-control qty-input text-center" style="width:40px;">
-                                <button class="btn btn-outline-success btn-sm plus-btn" data-name="Grilled Salmon" data-price="24.99">+</button>
-                            </div>
-                            <button class="btn btn-success ms-2 add-btn" data-name="Grilled Salmon" data-price="24.99">Add</button>
-                        </div>
-                    </div>
+            <!-- Menu items will be loaded dynamically from backend -->
+            <div class="col-12 text-center">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
                 </div>
-            </div>
-
-            <!-- Menu Item 2 -->
-            <div class="col-md-4">
-                <div class="card menu-item">
-                    <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="Food Item">
-                    <div class="card-body">
-                        <h5 class="card-title">Beef Steak</h5>
-                        <p class="card-text">Premium cut with special sauce</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="h5 mb-0">Rp 449.850</span>
-                            <div class="input-group" style="max-width: 120px;">
-                                <button class="btn btn-outline-danger btn-sm minus-btn" data-name="Beef Steak" data-price="29.99">-</button>
-                                <input type="number" min="0" value="0" class="form-control qty-input text-center" style="width:40px;">
-                                <button class="btn btn-outline-success btn-sm plus-btn" data-name="Beef Steak" data-price="29.99">+</button>
-                            </div>
-                            <button class="btn btn-success ms-2 add-btn" data-name="Beef Steak" data-price="29.99">Add</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Menu Item 3 -->
-            <div class="col-md-4">
-                <div class="card menu-item">
-                    <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="Food Item">
-                    <div class="card-body">
-                        <h5 class="card-title">Caesar Salad</h5>
-                        <p class="card-text">Fresh vegetables with Caesar dressing</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="h5 mb-0">Rp 194.850</span>
-                            <div class="input-group" style="max-width: 120px;">
-                                <button class="btn btn-outline-danger btn-sm minus-btn" data-name="Caesar Salad" data-price="12.99">-</button>
-                                <input type="number" min="0" value="0" class="form-control qty-input text-center" style="width:40px;">
-                                <button class="btn btn-outline-success btn-sm plus-btn" data-name="Caesar Salad" data-price="12.99">+</button>
-                            </div>
-                            <button class="btn btn-success ms-2 add-btn" data-name="Caesar Salad" data-price="12.99">Add</button>
-                        </div>
-                    </div>
-                </div>
+                <p class="mt-2">Loading menu items...</p>
             </div>
         </div>
     </div>

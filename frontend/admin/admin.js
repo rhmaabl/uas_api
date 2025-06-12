@@ -1,3 +1,57 @@
+const API_BASE_URL = 'http://localhost:3000/api';
+
+async function fetchOrdersData() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/orders`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching orders:', error);
+        return [];
+    }
+}
+
+async function fetchUsersData() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/users`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        return [];
+    }
+}
+
+async function fetchMenusData() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/menu`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching menus:', error);
+        return [];
+    }
+}
+
+async function fetchPaymentsData() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/payment`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching payments:', error);
+        return [];
+    }
+}
+
 // Navigation functionality
 
 document.querySelectorAll('.nav-link').forEach(link => {
@@ -312,4 +366,34 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-}); 
+});
+
+// Function to update dashboard statistics
+async function updateDashboardStats() {
+    const orders = await fetchOrdersData();
+    const users = await fetchUsersData();
+
+    const totalOrders = orders.length;
+    const activeUsers = users.length; // Assuming all fetched users are active
+    
+    let todayRevenue = 0;
+    let pendingOrders = 0;
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+    orders.forEach(order => {
+        // Calculate revenue for today's orders (assuming created_at is relevant for 'today')
+        if (order.created_at && order.created_at.startsWith(today)) {
+            todayRevenue += parseFloat(order.total);
+        }
+        // Count pending orders
+        if (order.status === 'pending') {
+            pendingOrders++;
+        }
+    });
+
+    // Update the dashboard elements
+    document.getElementById('totalOrders').textContent = totalOrders;
+    document.getElementById('todayRevenue').textContent = `Rp ${todayRevenue.toLocaleString('id-ID')}`;
+    document.getElementById('activeUsers').textContent = activeUsers;
+    document.getElementById('pendingOrders').textContent = pendingOrders;
+} 
