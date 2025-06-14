@@ -1,30 +1,56 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Load email from localStorage (set during registration/login)
-    const emailInput = document.querySelector('input[type="email"]');
-    const emailEditLink = document.querySelector('.email-edit-link');
-    const saveBtn = document.querySelector('.btn-save');
+    // Get all profile elements
+    const usernameElement = document.getElementById('username');
+    const emailElement = document.getElementById('email');
+    const roleElement = document.getElementById('role');
+    const createdAtElement = document.getElementById('createdAt');
+    const userIdElement = document.getElementById('userId');
 
-    // Set email from localStorage if available
-    if (localStorage.getItem('userEmail')) {
-        emailInput.value = localStorage.getItem('userEmail');
-    }
-
-    // Make email editable when 'Ubah' is clicked
-    if (emailEditLink) {
-        emailEditLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            emailInput.removeAttribute('readonly');
-            emailInput.focus();
+    // Fetch user data using JWT token
+    const token = localStorage.getItem('token');
+    if (token) {
+        fetch('http://localhost:3000/api/users/me', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(userData => {
+            // Set all user data from API response
+            usernameElement.textContent = userData.username || 'N/A';
+            emailElement.textContent = userData.email || 'N/A';
+            roleElement.textContent = userData.role || 'N/A';
+            userIdElement.textContent = userData.id_user || 'N/A';
+            
+            // Format the date
+            if (userData.created_at) {
+                const date = new Date(userData.created_at);
+                createdAtElement.textContent = date.toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
+            } else {
+                createdAtElement.textContent = 'N/A';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching user data:', error);
+            // Show error state
+            usernameElement.textContent = 'Error loading profile';
+            emailElement.textContent = 'Please try again later';
+            roleElement.textContent = '';
+            createdAtElement.textContent = '';
+            userIdElement.textContent = '';
         });
-    }
-
-    // Save new email to localStorage on form submit
-    if (saveBtn) {
-        saveBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            localStorage.setItem('userEmail', emailInput.value);
-            emailInput.setAttribute('readonly', 'readonly');
-            alert('Profil berhasil disimpan!');
-        });
+    } else {
+        // No token found, redirect to login
+        window.location.href = '../login/login.html';
     }
 }); 

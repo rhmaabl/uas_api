@@ -106,6 +106,40 @@ const userController = {
             res.status(500).json({ message: error.message });
         }
     },
+    getUserByToken: async (req, res) => {
+        try {
+            // Get token from Authorization header
+            const authHeader = req.headers.authorization;
+            if (!authHeader || !authHeader.startsWith('Bearer ')) {
+                return res.status(401).json({ message: 'No token provided' });
+            }
+
+            const token = authHeader.split(' ')[1];
+            
+            // Verify and decode the token
+            const decoded = jwt.verify(token, JWT_SECRET);
+            
+            // Find user by username from decoded token
+            const user = await User.findOne({
+                where: { username: decoded.username },
+                attributes: ['id_user', 'username', 'email', 'role', 'created_at', 'updated_at']
+            });
+
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+
+            res.json(user);
+        } catch (error) {
+            if (error.name === 'JsonWebTokenError') {
+                return res.status(401).json({ message: 'Invalid token' });
+            }
+            if (error.name === 'TokenExpiredError') {
+                return res.status(401).json({ message: 'Token expired' });
+            }
+            res.status(500).json({ message: error.message });
+        }
+    },
 };
 
 module.exports = userController; 

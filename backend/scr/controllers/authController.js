@@ -15,7 +15,7 @@ const authController = {
             }
             const hashedPassword = await bcrypt.hash(password, 10);
             const token = jwt.sign(
-                { username, role: role || 'kasir' },
+                { username, role: role || 'pelanggan' },
                 JWT_SECRET,
                 { expiresIn: '24h' }
             );
@@ -23,7 +23,7 @@ const authController = {
                 username,
                 password: hashedPassword,
                 email,
-                role: role || 'kasir',
+                role: role || 'pelanggan',
                 token
             });
             res.status(201).json({

@@ -55,18 +55,22 @@ function displayMenuItems(filteredItems = null) {
     menuContainer.innerHTML = itemsToDisplay.map(item => `
         <div class="col-md-4">
             <div class="card menu-item">
-                <img src="${item.gambar || 'https://via.placeholder.com/300x200'}" class="card-img-top" alt="${item.nama}" onerror="this.src='https://via.placeholder.com/300x200'">
+                <img src="${item.gambar || 'https://via.placeholder.com/300x200'}" 
+                     class="card-img-top" 
+                     alt="${item.nama}" 
+                     onerror="this.src='https://via.placeholder.com/300x200'"
+                     style="height: 200px; object-fit: cover;">
                 <div class="card-body">
                     <h5 class="card-title">${item.nama}</h5>
                     <p class="card-text">${item.kategori ? item.kategori.nama_kategori : 'No category'}</p>
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="h5 mb-0">${formatCurrency(item.harga)}</span>
                         <div class="input-group" style="max-width: 120px;">
-                            <button class="btn btn-outline-danger btn-sm minus-btn" data-id="${item.id}" data-name="${item.nama}" data-price="${item.harga}">-</button>
+                            <button class="btn btn-outline-danger btn-sm minus-btn" data-id="${item.id}" data-name="${item.nama}" data-price="${item.harga}" data-image="${item.gambar || 'https://via.placeholder.com/300x200'}">-</button>
                             <input type="number" min="0" value="0" class="form-control qty-input text-center" style="width:40px;">
-                            <button class="btn btn-outline-success btn-sm plus-btn" data-id="${item.id}" data-name="${item.nama}" data-price="${item.harga}">+</button>
+                            <button class="btn btn-outline-success btn-sm plus-btn" data-id="${item.id}" data-name="${item.nama}" data-price="${item.harga}" data-image="${item.gambar || 'https://via.placeholder.com/300x200'}">+</button>
                         </div>
-                        <button class="btn btn-success ms-2 add-btn" data-id="${item.id}" data-name="${item.nama}" data-price="${item.harga}">Add</button>
+                        <button class="btn btn-success ms-2 add-btn" data-id="${item.id}" data-name="${item.nama}" data-price="${item.harga}" data-image="${item.gambar || 'https://via.placeholder.com/300x200'}">Add</button>
                     </div>
                 </div>
             </div>
@@ -130,8 +134,9 @@ function attachMenuEventListeners() {
             const id = addBtn.dataset.id;
             const name = addBtn.dataset.name;
             const price = parseFloat(addBtn.dataset.price);
+            const image = addBtn.dataset.image;
             const qty = parseInt(qtyInput.value) || 1;
-            addToCart(id, name, price, qty);
+            addToCart(id, name, price, qty, image);
         });
     });
 }
@@ -154,12 +159,12 @@ window.addEventListener('DOMContentLoaded', async () => {
     await Promise.all([fetchMenuItems(), fetchCategories()]);
 });
 
-function addToCart(id, name, price, qty) {
+function addToCart(id, name, price, qty, image) {
     const existing = cart.find(item => item.id === id);
     if (existing) {
         existing.qty += qty;
     } else {
-        cart.push({ id, name, price, qty });
+        cart.push({ id, name, price, qty, image });
     }
     updateCartUI();
 }
@@ -191,8 +196,8 @@ function updateCartUI() {
         subtotal += item.price * item.qty;
         return `
             <div class="order-item" style="display:flex;align-items:center;gap:16px;padding:16px 0;border-bottom:1px solid #eee;">
-                <div class="item-image" style="width:60px;height:60px;border-radius:8px;overflow:hidden;background:#eee;display:flex;align-items:center;justify-content:center;">
-                    <img src="https://via.placeholder.com/60" alt="Food Item" style="width:100%;height:100%;object-fit:cover;">
+                <div class="item-image" style="width:60px;height:60px;border-radius:8px;overflow:hidden;background:#eee;">
+                    <img src="${item.image}" alt="${item.name}" style="width:100%;height:100%;object-fit:cover;">
                 </div>
                 <div class="item-details" style="flex:1;">
                     <h3 style="font-size:1rem;margin-bottom:4px;">${item.name}</h3>
@@ -265,11 +270,17 @@ async function checkout() {
         alert('Your cart is empty!');
         return;
     }
-    
+
     try {
-        // Prepare order data for backend
+        // Ambil id_user dari localStorage
+        const id_user = localStorage.getItem('id_user');
+        if (!id_user) {
+            alert('User not logged in!');
+            return;
+        }
+
         const orderData = {
-            id_user: 1, // You might want to get this from user session/authentication
+            id_user: parseInt(id_user),
             items: cart.map(item => ({
                 id_menu: item.id,
                 jumlah: item.qty,
@@ -281,34 +292,38 @@ async function checkout() {
         const response = await fetch(`${API_BASE_URL}/orders`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(orderData)
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errData = await response.json();
+            throw new Error(errData.error || errData.message || `HTTP error! status: ${response.status}`);
         }
 
         const createdOrder = await response.json();
-        
-        // Show success message with order ID
-        alert(`Order placed successfully! Order #${createdOrder.id_order}`);
-        
+
+        // Tampilkan nomor antrian di modal
+        if (createdOrder.nomor_antrian) {
+            document.getElementById('queueNumber').textContent = createdOrder.nomor_antrian;
+            const modal = new bootstrap.Modal(document.getElementById('queueNumberModal'));
+            modal.show();
+        } else {
+            alert('Order placed successfully!');
+        }
+
         // Clear cart
         cart = [];
         cartTotal = 0;
         updateCartUI();
-        
+
         // Close cart modal
         const cartModal = bootstrap.Modal.getInstance(document.getElementById('cartModal'));
-        cartModal.hide();
-        
-        // Optionally redirect to order history
-        // window.location.href = '../order/order.html';
-        
+        if (cartModal) cartModal.hide();
+
     } catch (error) {
         console.error('Error during checkout:', error);
-        alert('Failed to place order. Please try again.');
+        alert(error.message || 'Failed to place order. Please try again.');
     }
 }

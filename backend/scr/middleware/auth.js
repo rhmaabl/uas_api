@@ -22,15 +22,9 @@ const authMiddleware = {
         }
         next();
     },
-    isKasir: (req, res, next) => {
-        if (req.user.role !== 'kasir' && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Access denied. Kasir only.' });
-        }
-        next();
-    },
-    isOwner: (req, res, next) => {
-        if (req.user.role !== 'owner' && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Access denied. Owner only.' });
+    isPelanggan: (req, res, next) => {
+        if (req.user.role !== 'pelanggan' && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Access denied. Pelanggan only.' });
         }
         next();
     }

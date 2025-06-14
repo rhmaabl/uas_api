@@ -1,3 +1,95 @@
+// API Configuration
+const API_BASE_URL = 'http://localhost:3000/api';
+
+document.getElementById('registrationForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    // Get form values
+    const username = document.getElementById('username').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    // Validate form
+    if (!username || !email || !password || !confirmPassword) {
+        showError('All fields are required');
+        return;
+    }
+
+    if (!isValidEmail(email)) {
+        showError('Please enter a valid email address');
+        return;
+    }
+
+    if (!isStrongPassword(password)) {
+        showError('Password must be at least 8 characters long and contain uppercase, lowercase, and numbers');
+        return;
+    }
+
+    if (password !== confirmPassword) {
+        showError('Passwords do not match');
+        return;
+    }
+
+    try {
+        console.log('Registration data:', { username, email, password });
+        // Send registration request to backend
+        const response = await fetch(`${API_BASE_URL}/auth/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username,
+                email,
+                password,
+                role: 'pelanggan' // Default role for new registrations
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Registration failed');
+        }
+
+        // Store token and user data
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('userEmail', data.user.email);
+        localStorage.setItem('id_user', data.user.id);
+
+        // Show success message and redirect
+        alert('Registration successful! Redirecting to login page...');
+        window.location.href = '../login/login.html';
+
+    } catch (error) {
+        console.error('Registration error:', error);
+        showError(error.message || 'Registration failed. Please try again.');
+    }
+});
+
+// Function to show error message
+function showError(message) {
+    errorAlert.textContent = message;
+    errorAlert.style.display = 'block';
+    setTimeout(() => {
+        errorAlert.style.display = 'none';
+    }, 5000);
+}
+
+// Function to validate email format
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+// Function to validate password strength
+function isStrongPassword(password) {
+    // At least 8 characters, 1 uppercase, 1 lowercase, 1 number
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+    return passwordRegex.test(password);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // Navigation
     const hamburger = document.querySelector('.hamburger');
@@ -8,14 +100,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const menuGrid = document.getElementById('menu-grid');
     const categoryButtons = document.querySelectorAll('.category-btn');
     const contactForm = document.getElementById('contact-form');
+    const registrationForm = document.getElementById('registrationForm');
+    const errorAlert = document.getElementById('errorAlert');
 
     // Cart state
     let cart = [];
     let cartTotal = 0;
     let menuItems = [];
-
-    // API Configuration
-    const API_BASE_URL = 'http://localhost:3000/api';
 
     // Fetch menu items from API
     async function fetchMenuItems() {
@@ -228,6 +319,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Registration Form Submission
+    
     // Initialize
     fetchMenuItems();
 }); 
