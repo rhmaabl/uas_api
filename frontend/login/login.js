@@ -80,18 +80,36 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Form submission handler
-    window.handleLogin = function(event) {
+    window.handleLogin = async function(event) {
         event.preventDefault();
         
         if (validateForm()) {
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
-            
-            // Here you would typically send the data to your backend
-            console.log('Login attempt:', data);
-            
-            // For demo purposes, redirect to main page
-            window.location.href = '../index/index.html';
+
+            try {
+                // Kirim data login ke backend
+                const response = await fetch('http://localhost:3000/api/users/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: data.email,
+                        password: data.password
+                    })
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.message || 'Login failed');
+                }
+                // Simpan token, email, dan id_user ke localStorage
+                localStorage.setItem('token', result.token);
+                localStorage.setItem('userEmail', result.user.email);
+                localStorage.setItem('id_user', result.user.id_user);
+                // Redirect ke halaman utama
+                window.location.href = '../index/index.html';
+            } catch (error) {
+                alert(error.message || 'Login failed. Please try again.');
+            }
         }
     };
 

@@ -1,5 +1,33 @@
 const API_BASE_URL = 'http://localhost:3000/api';
 
+// Menu Management
+async function getMenus() {
+    try {
+        const response = await fetch('http://localhost:3000/api/menu');
+        const menus = await response.json();
+        const tbody = document.querySelector('#menu .table tbody');
+        tbody.innerHTML = ''; // Clear previous rows
+
+        menus.forEach(menu => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><img src="${menu.gambar || 'https://via.placeholder.com/50'}" class="rounded" alt="${menu.nama}" style="width: 50px; height: 50px; object-fit: cover;"></td>
+                <td>${menu.nama}</td>
+                <td>${menu.kategori ? menu.kategori.nama_kategori : '-'}</td>
+                <td>Rp ${menu.harga.toLocaleString('id-ID')}</td>
+                <td>
+                    <button class="btn btn-sm btn-primary" onclick="editMenu(${menu.id})">Edit</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteMenu(${menu.id})">Delete</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (error) {
+        console.error('Error fetching menus:', error);
+        alert('Failed to load menus. Please try again later.');
+    }
+}
+
 async function fetchOrdersData() {
     try {
         const response = await fetch(`${API_BASE_URL}/orders`);
@@ -77,6 +105,8 @@ document.querySelectorAll('.nav-link').forEach(link => {
                 getPayments();
             } else if (targetId === 'users') {
                 getUsers();
+            } else if (targetId === 'dashboard') {
+                updateDashboardStats();
             }
         }
     });
@@ -87,42 +117,41 @@ document.querySelectorAll('.nav-link').forEach(link => {
 document.getElementById('addItemForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
-    // Get form data as FormData object
-    const formData = new FormData(this);
-    
-    // Convert FormData to JSON object
-    const jsonData = {
-        nama: formData.get('nama'),
-        id_kategori: parseInt(formData.get('id_kategori')),
-        harga: parseInt(formData.get('harga')),
-        gambar: formData.get('gambar')
-    };
+    // Get data directly from input elements
+    const nama = document.getElementById('nama').value;
+    const id_kategori = parseInt(document.getElementById('id_kategori').value);
+    const harga = parseInt(document.getElementById('harga').value);
+    const gambar = document.getElementById('gambar').value;
+
+    const id_menu = this.dataset.editing;
+    const jsonData = { nama, id_kategori, harga, gambar };
+
+    let url = 'http://localhost:3000/api/menu';
+    let method = 'POST';
+    if (id_menu) {
+        url += `/${id_menu}`;
+        method = 'PUT';
+    }
 
     try {
-        const response = await fetch('http://localhost:3000/api/menu', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+        const response = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(jsonData)
         });
-
         if (response.ok) {
-            const result = await response.json();
-            alert('Item added successfully!');
+            alert(id_menu ? 'Item updated successfully!' : 'Item added successfully!');
             const modal = bootstrap.Modal.getInstance(document.getElementById('addItemModal'));
             modal.hide();
-            // Refresh the menu list
             getMenus();
-            // Reset the form
             this.reset();
+            delete this.dataset.editing;
         } else {
             const error = await response.json();
-            throw new Error(error.message || 'Failed to add item');
+            throw new Error(error.message || 'Failed to save item');
         }
     } catch (error) {
-        console.error('Error adding menu item:', error);
-        alert(error.message || 'Failed to add item. Please try again later.');
+        alert(error.message || 'Failed to save item. Please try again later.');
     }
 });
 
@@ -133,19 +162,21 @@ document.addEventListener('DOMContentLoaded', function() {
     async function getOrders() {
         const response = await fetch('http://localhost:3000/api/orders');
         const orders = await response.json();
-        console.log(orders);
         const tbody = document.getElementById('ordersTableBody');
-        tbody.innerHTML = ''; // Clear previous rows
+        tbody.innerHTML = '';
+
+        // Urutkan order dari terbaru ke terlama (opsional, agar histori paling baru di atas)
+        orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
         orders.forEach(order => {
-            // For each order, you may want to display all order_items in separate rows or as a list in one row
             order.order_items.forEach((item, idx) => {
                 const tr = document.createElement('tr');
                 const totalHarga = item.harga_satuan * item.jumlah;
-                // Only show order info in the first row for this order
+                // Ambil nama customer dari order.user.username, fallback ke email atau '-'
+                const customerName = order.user && order.user.username ? order.user.username : (order.user && order.user.email ? order.user.email : '-');
                 tr.innerHTML = `
                     ${idx === 0 ? `<td rowspan="${order.order_items.length}">${order.id_order}</td>` : ''}
-                    <td>${order.user.username}</td>
+                    <td>${customerName}</td>
                     <td>${item.menu ? item.menu.nama : '-'}</td>
                     <td>Rp ${item.harga_satuan.toLocaleString('id-ID')}</td>
                     <td>${item.jumlah}</td>
@@ -167,34 +198,7 @@ document.addEventListener('DOMContentLoaded', function() {
         attachOrderEventListeners();
     }
 
-    // Menu Management
-    async function getMenus() {
-        try {
-            const response = await fetch('http://localhost:3000/api/menu');
-            const menus = await response.json();
-            const tbody = document.querySelector('#menu .table tbody');
-            tbody.innerHTML = ''; // Clear previous rows
-
-            menus.forEach(menu => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><img src="${menu.gambar || 'https://via.placeholder.com/50'}" class="rounded" alt="${menu.nama}" style="width: 50px; height: 50px; object-fit: cover;"></td>
-                    <td>${menu.nama}</td>
-                    <td>${menu.kategori ? menu.kategori.nama_kategori : '-'}</td>
-                    <td>Rp ${menu.harga.toLocaleString('id-ID')}</td>
-                    <td>
-                        <button class="btn btn-sm btn-primary" onclick="editMenu(${menu.id_menu})">Edit</button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteMenu(${menu.id_menu})">Delete</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        } catch (error) {
-            console.error('Error fetching menus:', error);
-            alert('Failed to load menus. Please try again later.');
-        }
-    }
-
+    
     // Payment Management
     async function getPayments() {
         try {
@@ -321,51 +325,72 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Function to attach order event listeners
+    function attachOrderEventListeners() {
+        document.querySelectorAll('.order-complete').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const orderId = this.closest('tr').querySelector('td').textContent;
+                try {
+                    const response = await fetch(`http://localhost:3000/api/orders/${orderId}/status`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ status: 'selesai' })
+                    });
+
+                    if (response.ok) {
+                        const row = this.closest('tr');
+                        const statusCell = row.querySelector('td:nth-last-child(2)');
+                        statusCell.textContent = 'selesai';
+                        this.disabled = true;
+                        this.closest('td').querySelector('.order-cancel').disabled = true;
+                    } else {
+                        throw new Error('Failed to update order status');
+                    }
+                } catch (error) {
+                    console.error('Error updating order:', error);
+                    alert('Failed to update order status. Please try again later.');
+                }
+            });
+        });
+
+        document.querySelectorAll('.order-cancel').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const orderId = this.closest('tr').querySelector('td').textContent;
+                try {
+                    const response = await fetch(`http://localhost:3000/api/orders/${orderId}/status`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ status: 'Cancelled' })
+                    });
+
+                    if (response.ok) {
+                        const row = this.closest('tr');
+                        const statusCell = row.querySelector('td:nth-last-child(2)');
+                        statusCell.textContent = 'Cancelled';
+                        this.disabled = true;
+                        this.closest('td').querySelector('.order-complete').disabled = true;
+                    } else {
+                        throw new Error('Failed to update order status');
+                    }
+                } catch (error) {
+                    console.error('Error updating order:', error);
+                    alert('Failed to update order status. Please try again later.');
+                }
+            });
+        });
+    }
+
     // Initial load of data
     getMenus();
     getOrders();
     getPayments();
     getUsers();
 
-    document.querySelectorAll('.order-complete').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const row = btn.closest('tr');
-            row.querySelector('.badge').className = 'badge bg-success';
-            row.querySelector('.badge').textContent = 'Completed';
-            btn.classList.remove('btn-success');
-            btn.classList.add('btn-secondary');
-            btn.disabled = true;
-        });
-    });
-    document.querySelectorAll('.order-cancel').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const row = btn.closest('tr');
-            row.querySelector('.badge').className = 'badge bg-danger';
-            row.querySelector('.badge').textContent = 'Cancelled';
-            row.querySelectorAll('button').forEach(b => b.disabled = true);
-        });
-    });
-
-    // Payments
-    document.querySelectorAll('.payment-complete').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const row = btn.closest('tr');
-            row.querySelector('.badge').className = 'badge bg-success';
-            row.querySelector('.badge').textContent = 'Paid';
-            btn.classList.remove('btn-success');
-            btn.classList.add('btn-secondary');
-            btn.disabled = true;
-        });
-    });
-
-    // Users
-    document.querySelectorAll('.user-delete').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const row = btn.closest('tr');
-            row.remove();
-        });
-    });
-
+    updateDashboardStats();
 });
 
 // Function to update dashboard statistics
@@ -381,8 +406,8 @@ async function updateDashboardStats() {
     const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
     orders.forEach(order => {
-        // Calculate revenue for today's orders (assuming created_at is relevant for 'today')
-        if (order.created_at && order.created_at.startsWith(today)) {
+        // Hanya hitung revenue dari order yang statusnya 'selesai' (Completed) dan tanggal hari ini
+        if (order.created_at && order.created_at.startsWith(today) && (order.status === 'selesai' || order.status === 'Completed')) {
             todayRevenue += parseFloat(order.total);
         }
         // Count pending orders
@@ -396,4 +421,46 @@ async function updateDashboardStats() {
     document.getElementById('todayRevenue').textContent = `Rp ${todayRevenue.toLocaleString('id-ID')}`;
     document.getElementById('activeUsers').textContent = activeUsers;
     document.getElementById('pendingOrders').textContent = pendingOrders;
+}
+
+async function deleteMenu(id_menu) {
+    if (confirm('Are you sure you want to delete this menu item?')) {
+        try {
+            const response = await fetch(`http://localhost:3000/api/menu/${id_menu}`, {
+                method: 'DELETE'
+            });
+            if (response.ok) {
+                alert('Menu item deleted successfully!');
+                getMenus(); // Refresh the menu list
+            } else {
+                throw new Error('Failed to delete menu item');
+            }
+        } catch (error) {
+            alert(error.message || 'Failed to delete menu item. Please try again later.');
+        }
+    }
+}
+
+document.querySelectorAll('.delete-menu').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const id_menu = this.dataset.id;
+        deleteMenu(id_menu);
+    });
+});
+
+function editMenu(id_menu) {
+    // Fetch menu data by id_menu (or use data already available)
+    fetch(`http://localhost:3000/api/menu/${id_menu}`)
+        .then(res => res.json())
+        .then(menu => {
+            document.getElementById('nama').value = menu.nama;
+            document.getElementById('id_kategori').value = menu.id_kategori;
+            document.getElementById('harga').value = menu.harga;
+            document.getElementById('gambar').value = menu.gambar;
+            // Store the id_menu somewhere, e.g., a hidden input or a variable
+            document.getElementById('addItemForm').dataset.editing = id_menu;
+            // Show the modal
+            const modal = new bootstrap.Modal(document.getElementById('addItemModal'));
+            modal.show();
+        });
 } 

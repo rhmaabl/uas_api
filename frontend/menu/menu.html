@@ -27,7 +27,7 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="../profil/profile.html">Profile</a></li>
-                            <li><a class="dropdown-item" href="#">Orders History</a></li>
+                            <li><a class="dropdown-item" href="../order/order.html">Orders History</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="../login/login.html">Logout</a></li>
                         </ul>
@@ -77,18 +77,18 @@
 
     <!-- Cart Modal -->
     <div class="modal fade" id="cartModal" tabindex="-1">
-        <div class="modal-dialog" style="max-width: 500px;">
+        <div class="modal-dialog" style="max-width: 800px;">
             <div class="modal-content p-0" style="border-radius: 12px; overflow: hidden;">
                 <div class="order-container" style="box-shadow:none; max-width:100%; margin:0; padding:0;">
                     <div class="order-header" style="padding: 20px 20px 0 20px;">
                         <h1 style="font-size:1.2rem; margin-bottom:0;">Your Cart</h1>
                         <p class="order-subtitle" style="font-size:0.95rem;">Review your selected items</p>
                     </div>
-                    <div class="order-content" style="display: flex; flex-direction: row; gap: 16px; padding: 0 20px 20px 20px;">
+                    <div class="order-content" style="display: flex; flex-direction: row; gap: 16px; padding: 0 20px 20px 20px; justify-content: space-between;">
                         <div class="order-items" style="box-shadow:none; padding:0; min-width:180px;">
                             <div id="cartItems"></div>
                         </div>
-                        <div class="order-summary" style="box-shadow:none; min-width:150px; padding: 12px 10px;">
+                        <div class="order-summary" style="box-shadow:none; padding: 12px 10px;">
                             <h2 style="font-size:1rem; margin-bottom:10px;">Order Summary</h2>
                             <div class="summary-item" style="font-size:0.95rem;">
                                 <span>Subtotal</span>

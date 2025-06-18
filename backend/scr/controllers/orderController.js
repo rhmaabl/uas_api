@@ -40,6 +40,12 @@ exports.getOrderById = async (req, res) => {
 exports.createOrder = async (req, res) => {
   const { id_user, items } = req.body;
   try {
+    // Validasi user
+    const user = await User.findByPk(id_user);
+    if (!user) {
+      return res.status(400).json({ error: 'User not found' });
+    }
+
     const order = await Order.create({ id_user, total: 0 });
     let totalOrder = 0;
 
@@ -47,7 +53,6 @@ exports.createOrder = async (req, res) => {
       for (const item of items) {
         const subtotal = item.jumlah * item.harga_satuan;
         totalOrder += subtotal;
-        
         await OrderItem.create({
           id_order: order.id_order,
           id_menu: item.id_menu,

@@ -122,11 +122,11 @@ function attachMenuEventListeners() {
 
         minusBtn.addEventListener('click', () => {
             let qty = parseInt(qtyInput.value) || 1;
-            if (qty > 1) qtyInput.value = qty - 1;
+            if (qty > 0) qtyInput.value = qty - 1;
         });
 
         plusBtn.addEventListener('click', () => {
-            let qty = parseInt(qtyInput.value) || 1;
+            let qty = parseInt(qtyInput.value) || 0;
             qtyInput.value = qty + 1;
         });
 
@@ -274,8 +274,9 @@ async function checkout() {
     try {
         // Ambil id_user dari localStorage
         const id_user = localStorage.getItem('id_user');
-        if (!id_user) {
-            alert('User not logged in!');
+        console.log('Checkout id_user:', id_user);
+        if (!id_user || isNaN(parseInt(id_user))) {
+            alert('User ID tidak valid. Silakan login ulang.');
             return;
         }
 

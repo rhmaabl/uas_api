@@ -193,6 +193,7 @@ function showOrderDetailsModal(order) {
                         </div>
                     </div>
                     <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" onclick="deleteOrder(${order.id_order})">Delete Order</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
@@ -212,6 +213,28 @@ function showOrderDetailsModal(order) {
     // Show modal
     const modal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
     modal.show();
+}
+
+// Fungsi hapus order
+async function deleteOrder(orderId) {
+    if (!confirm('Are you sure you want to delete this order?')) return;
+    try {
+        const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
+            method: 'DELETE'
+        });
+        if (response.ok) {
+            // Tutup modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('orderDetailsModal'));
+            modal.hide();
+            // Refresh order list
+            fetchOrders();
+            alert('Order deleted successfully.');
+        } else {
+            throw new Error('Failed to delete order');
+        }
+    } catch (error) {
+        alert('Failed to delete order. Please try again.');
+    }
 }
 
 // Show loading state

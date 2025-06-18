@@ -22,7 +22,7 @@ document.getElementById('registrationForm').addEventListener('submit', async (e)
     }
 
     if (!isStrongPassword(password)) {
-        showError('Password must be at least 8 characters long and contain uppercase, lowercase, and numbers');
+        showError('Password must be at least 8 characters long');
         return;
     }
 
@@ -85,9 +85,7 @@ function isValidEmail(email) {
 
 // Function to validate password strength
 function isStrongPassword(password) {
-    // At least 8 characters, 1 uppercase, 1 lowercase, 1 number
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
-    return passwordRegex.test(password);
+    return password.length >= 8;
 }
 
 document.addEventListener('DOMContentLoaded', () => {

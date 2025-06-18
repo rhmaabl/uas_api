@@ -242,12 +242,12 @@ body {
 
 .order-items {
     min-width: 200px;
-    max-width: 260px;
+    max-width: 800px;
 }
 
 .order-summary {
-    min-width: 160px;
-    max-width: 220px;
+    min-width: 295px;
+    max-width: 600px;
     padding: 16px 12px;
     background: #f8f9fa;
     border-radius: 8px;
