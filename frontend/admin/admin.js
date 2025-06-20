@@ -59,7 +59,7 @@ async function getMenus() {
         menus.forEach(menu => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><img src="${menu.gambar || 'https://via.placeholder.com/50'}" class="rounded" alt="${menu.nama}" style="width: 50px; height: 50px; object-fit: cover;"></td>
+                <td><img src="${menu.gambar || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzljYTNhZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vPC90ZXh0Pjwvc3ZnPg=='}" class="rounded" alt="${menu.nama}" style="width: 50px; height: 50px; object-fit: cover;"></td>
                 <td>${menu.nama}</td>
                 <td>${menu.kategori ? menu.kategori.nama_kategori : '-'}</td>
                 <td>Rp ${menu.harga.toLocaleString('id-ID')}</td>

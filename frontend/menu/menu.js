@@ -34,7 +34,7 @@ async function fetchMenuItems() {
         displayMenuItems();
     } catch (error) {
         console.error('Error fetching menu items:', error);
-        showError('Failed to load menu items. Please try again later.');
+        showToast('Failed to load menu items. Please try again later.', 'error');
     }
 }
 
@@ -67,10 +67,10 @@ function displayMenuItems(filteredItems = null) {
     menuContainer.innerHTML = itemsToDisplay.map(item => `
         <div class="col-md-4">
             <div class="card menu-item">
-                <img src="${item.gambar || 'https://via.placeholder.com/300x200'}" 
+                <img src="${item.gambar || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y4ZjlmYSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IiM5Y2EzYWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='}" 
                      class="card-img-top" 
                      alt="${item.nama}" 
-                     onerror="this.src='https://via.placeholder.com/300x200'"
+                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y4ZjlmYSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IiM5Y2EzYWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='"
                      style="height: 200px; object-fit: cover;">
                 <div class="card-body">
                     <h5 class="card-title">${item.nama}</h5>
@@ -78,11 +78,11 @@ function displayMenuItems(filteredItems = null) {
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="h5 mb-0">${formatCurrency(item.harga)}</span>
                         <div class="input-group" style="max-width: 120px;">
-                            <button class="btn btn-outline-danger btn-sm minus-btn" data-id="${item.id}" data-name="${item.nama}" data-price="${item.harga}" data-image="${item.gambar || 'https://via.placeholder.com/300x200'}">-</button>
-                            <input type="number" min="0" value="0" class="form-control qty-input text-center" style="width:40px;">
-                            <button class="btn btn-outline-success btn-sm plus-btn" data-id="${item.id}" data-name="${item.nama}" data-price="${item.harga}" data-image="${item.gambar || 'https://via.placeholder.com/300x200'}">+</button>
+                            <button class="btn btn-outline-danger btn-sm minus-btn" data-id="${item.id}" data-name="${item.nama}" data-price="${item.harga}" data-image="${item.gambar || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y4ZjlmYSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IiM5Y2EzYWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='}">-</button>
+                            <input type="number" min="0" max="10" value="0" class="form-control qty-input text-center" style="width:40px;">
+                            <button class="btn btn-outline-success btn-sm plus-btn" data-id="${item.id}" data-name="${item.nama}" data-price="${item.harga}" data-image="${item.gambar || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y4ZjlmYSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IiM5Y2EzYWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='}">+</button>
                         </div>
-                        <button class="btn btn-success ms-2 add-btn" data-id="${item.id}" data-name="${item.nama}" data-price="${item.harga}" data-image="${item.gambar || 'https://via.placeholder.com/300x200'}">Add</button>
+                        <button class="btn btn-success ms-2 add-btn" data-id="${item.id}" data-name="${item.nama}" data-price="${item.harga}" data-image="${item.gambar || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y4ZjlmYSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IiM5Y2EzYWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='}">Add</button>
                     </div>
                 </div>
             </div>
@@ -133,13 +133,19 @@ function attachMenuEventListeners() {
         const addBtn = card.querySelector('.add-btn');
 
         minusBtn.addEventListener('click', () => {
-            let qty = parseInt(qtyInput.value) || 1;
-            if (qty > 0) qtyInput.value = qty - 1;
+            let qty = parseInt(qtyInput.value) || 0;
+            if (qty > 0) {
+                qtyInput.value = qty - 1;
+            }
         });
 
         plusBtn.addEventListener('click', () => {
             let qty = parseInt(qtyInput.value) || 0;
-            qtyInput.value = qty + 1;
+            if (qty < 10) {
+                qtyInput.value = qty + 1;
+            } else {
+                showToast('Maximum quantity is 10!', 'warning');
+            }
         });
 
         addBtn.addEventListener('click', () => {
@@ -147,8 +153,29 @@ function attachMenuEventListeners() {
             const name = addBtn.dataset.name;
             const price = parseFloat(addBtn.dataset.price);
             const image = addBtn.dataset.image;
-            const qty = parseInt(qtyInput.value) || 1;
+            const qty = parseInt(qtyInput.value) || 0;
+            
+            // Validasi quantity
+            if (qty <= 0) {
+                showToast('Please select quantity first!', 'warning');
+                return;
+            }
+            
             addToCart(id, name, price, qty, image);
+            
+            // Reset quantity input setelah ditambahkan ke cart
+            qtyInput.value = 0;
+        });
+        
+        // Validasi input quantity langsung
+        qtyInput.addEventListener('input', function() {
+            let value = parseInt(this.value) || 0;
+            if (value < 0) {
+                this.value = 0;
+            } else if (value > 10) {
+                this.value = 10;
+                showToast('Maximum quantity is 10!', 'warning');
+            }
         });
     });
 }
@@ -179,6 +206,9 @@ function addToCart(id, name, price, qty, image) {
         cart.push({ id, name, price, qty, image });
     }
     updateCartUI();
+    
+    // Show toast notification
+    showToast(`${name} added to cart!`, 'success');
 }
 
 function removeFromCart(id) {
@@ -279,7 +309,7 @@ function updateCartUI() {
 
 async function checkout() {
     if (cart.length === 0) {
-        alert('Your cart is empty!');
+        showToast('Your cart is empty!', 'warning');
         return;
     }
 
@@ -288,7 +318,7 @@ async function checkout() {
         const id_user = localStorage.getItem('id_user');
         console.log('Checkout id_user:', id_user);
         if (!id_user || isNaN(parseInt(id_user))) {
-            alert('User ID tidak valid. Silakan login ulang.');
+            showToast('User ID tidak valid. Silakan login ulang.', 'error');
             return;
         }
 
@@ -323,7 +353,7 @@ async function checkout() {
             const modal = new bootstrap.Modal(document.getElementById('queueNumberModal'));
             modal.show();
         } else {
-            alert('Order placed successfully!');
+            showToast('Order placed successfully!', 'success');
         }
 
         // Clear cart
@@ -337,6 +367,36 @@ async function checkout() {
 
     } catch (error) {
         console.error('Error during checkout:', error);
-        alert(error.message || 'Failed to place order. Please try again.');
+        showToast(error.message || 'Failed to place order. Please try again.', 'error');
     }
+}
+
+// Show toast notification
+function showToast(message, type = 'success') {
+    const toastElement = document.getElementById('addToCartToast');
+    const toastBody = toastElement.querySelector('.toast-body');
+    const toastIcon = toastElement.querySelector('.toast-header i');
+    const toastTitle = toastElement.querySelector('.toast-header strong');
+    
+    // Update toast content
+    toastBody.textContent = message;
+    
+    // Update icon and title based on type
+    if (type === 'success') {
+        toastIcon.className = 'fas fa-check-circle text-success me-2';
+        toastTitle.textContent = 'Success!';
+    } else if (type === 'error') {
+        toastIcon.className = 'fas fa-exclamation-circle text-danger me-2';
+        toastTitle.textContent = 'Error!';
+    } else if (type === 'warning') {
+        toastIcon.className = 'fas fa-exclamation-triangle text-warning me-2';
+        toastTitle.textContent = 'Warning!';
+    }
+    
+    // Show the toast
+    const toast = new bootstrap.Toast(toastElement, {
+        autohide: true,
+        delay: 3000
+    });
+    toast.show();
 }

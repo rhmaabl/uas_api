@@ -373,4 +373,69 @@ body {
     .section-subtitle {
         font-size: 1.1rem;
     }
+}
+
+/* Toast Notification Styles */
+.toast-container {
+    z-index: 9999;
+}
+
+.toast {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.toast-header {
+    background: transparent;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 12px 16px;
+}
+
+.toast-body {
+    padding: 12px 16px;
+    font-weight: 500;
+    color: #333;
+}
+
+.toast .btn-close {
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+}
+
+.toast .btn-close:hover {
+    opacity: 1;
+}
+
+/* Toast animation */
+.toast.show {
+    animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Success toast specific styling */
+.toast .fa-check-circle {
+    color: #28a745 !important;
+}
+
+/* Error toast specific styling */
+.toast .fa-exclamation-circle {
+    color: #dc3545 !important;
+}
+
+/* Warning toast specific styling */
+.toast .fa-exclamation-triangle {
+    color: #ffc107 !important;
 } 
