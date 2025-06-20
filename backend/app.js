@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+const { v4: uuidv4 } = require('uuid');
 
 const sequelize = require('./scr/config/sequelize');
 
@@ -10,6 +11,7 @@ const userRoutes = require('./scr/routes/users');
 const kategoriRoutes = require('./scr/routes/kategori');
 const paymentRoutes = require('./scr/routes/payment');
 const authRoutes = require('./scr/routes/auth');
+const apikeyRoutes = require('./scr/routes/apikey');
 
 const app = express();
 
@@ -31,6 +33,7 @@ app.use('/api/menu', menuRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/kategori', kategoriRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api', apikeyRoutes);
 
 // Test route
 app.get('/test', (req, res) => {

@@ -1,181 +1,102 @@
-// Login Page JavaScript
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('.auth-form');
-    const passwordInput = document.getElementById('password');
-    const rememberCheckbox = document.getElementById('remember');
-
-    // Password toggle functionality
-    window.togglePassword = function(inputId) {
-        const input = document.getElementById(inputId);
-        const icon = input.nextElementSibling;
-        
-        if (input.type === 'password') {
-            input.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        } else {
-            input.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        }
-    };
-
-    // Form validation
-    function validateForm() {
-        let isValid = true;
-        const email = document.getElementById('email').value;
-        const password = passwordInput.value;
-
-        // Email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            showError('email', 'Please enter a valid email address');
-            isValid = false;
-        } else {
-            removeError('email');
-        }
-
-        // Password validation
-        if (password.length < 8) {
-            showError('password', 'Password must be at least 8 characters long');
-            isValid = false;
-        } else {
-            removeError('password');
-        }
-
-        return isValid;
-    }
-
-    // Show error message
-    function showError(fieldId, message) {
-        const field = document.getElementById(fieldId);
-        const inputContainer = field.closest('.input-icon');
-        
-        field.classList.add('error');
-        
-        // Remove existing error message if any
-        const existingError = inputContainer.querySelector('.error-message');
-        if (existingError) {
-            existingError.remove();
-        }
-        
-        // Add new error message
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'error-message';
-        errorDiv.textContent = message;
-        inputContainer.appendChild(errorDiv);
-    }
-
-    // Remove error message
-    function removeError(fieldId) {
-        const field = document.getElementById(fieldId);
-        const inputContainer = field.closest('.input-icon');
-        
-        field.classList.remove('error');
-        
-        const errorMessage = inputContainer.querySelector('.error-message');
-        if (errorMessage) {
-            errorMessage.remove();
-        }
-    }
-
-    // Form submission handler
-    window.handleLogin = async function(event) {
-        event.preventDefault();
-        
-        if (validateForm()) {
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-
-            try {
-                // Kirim data login ke backend
-                const response = await fetch('http://localhost:3000/api/users/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: data.email,
-                        password: data.password
-                    })
-                });
-                const result = await response.json();
-                if (!response.ok) {
-                    throw new Error(result.message || 'Login failed');
-                }
-                // Simpan token, email, dan id_user ke localStorage
-                localStorage.setItem('token', result.token);
-                localStorage.setItem('userEmail', result.user.email);
-                localStorage.setItem('id_user', result.user.id_user);
-                // Redirect ke halaman utama
-                window.location.href = '../index/index.html';
-            } catch (error) {
-                alert(error.message || 'Login failed. Please try again.');
-            }
-        }
-    };
-
-    // Real-time validation
-    const inputs = form.querySelectorAll('input');
-    inputs.forEach(input => {
-        input.addEventListener('input', () => {
-            if (input.value.trim() !== '') {
-                removeError(input.id);
-            }
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const rememberMe = document.getElementById('rememberMe').checked;
+    
+    // Show loading state
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Logging in...';
+    submitBtn.disabled = true;
+    
+    try {
+        const response = await fetch('http://localhost:3000/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email, // Backend expects username field
+                password: password
+            })
         });
-    });
-
-    // Remember me functionality
-    if (rememberCheckbox) {
-        // Check if there are saved credentials
-        const savedEmail = localStorage.getItem('rememberedEmail');
-        if (savedEmail) {
-            document.getElementById('email').value = savedEmail;
-            rememberCheckbox.checked = true;
-        }
-
-        // Save email when checkbox is checked
-        rememberCheckbox.addEventListener('change', () => {
-            if (rememberCheckbox.checked) {
-                const email = document.getElementById('email').value;
-                if (email) {
-                    localStorage.setItem('rememberedEmail', email);
-                }
+        
+        const data = await response.json();
+        
+        if (response.ok && data.token) {
+            // Store token and user data
+            if (rememberMe) {
+                localStorage.setItem("role", data.user.role)
+                localStorage.setItem("token", data.token);
+                localStorage.setItem("userEmail", data.user.email);
+                localStorage.setItem("id_user", data.user.id);
             } else {
-                localStorage.removeItem('rememberedEmail');
+                localStorage.setItem("role", data.user.role)
+                localStorage.setItem("token", data.token);
+                localStorage.setItem("userEmail", data.user.email);
+                localStorage.setItem("id_user", data.user.id);
             }
-        });
-    }
-
-    // Forgot password handler
-    const forgotPasswordLink = document.querySelector('.forgot-password');
-    if (forgotPasswordLink) {
-        forgotPasswordLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
             
-            if (email && validateEmail(email)) {
-                // Here you would typically send a password reset email
-                console.log('Password reset requested for:', email);
-                alert('Password reset instructions have been sent to your email.');
+            // Redirect based on user role
+            if (data.user.role === 'admin') {
+                window.location.href = '../admin/admin.html';
             } else {
-                alert('Please enter a valid email address to reset your password.');
+                window.location.href = '../menu/menu.html';
             }
-        });
+        } else {
+            // Show error message
+            showError(data.message || 'Login failed. Please check your credentials.');
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        showError('Network error. Please check your connection.');
+    } finally {
+        // Reset button state
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
     }
+});
 
-    // Email validation helper
-    function validateEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
+function showError(message) {
+    // Remove existing error message
+    const existingError = document.querySelector('.alert-danger');
+    if (existingError) {
+        existingError.remove();
     }
+    
+    // Create error alert
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'alert alert-danger mt-3';
+    errorDiv.textContent = message;
+    
+    // Insert error message after the form
+    const form = document.getElementById('loginForm');
+    form.appendChild(errorDiv);
+    
+    // Auto-remove error after 5 seconds
+    setTimeout(() => {
+        if (errorDiv.parentNode) {
+            errorDiv.remove();
+        }
+    }, 5000);
+}
 
-    // Social login handlers
-    document.querySelector('.social-btn.google').addEventListener('click', () => {
-        // Implement Google login
-        console.log('Google login clicked');
-    });
+// Check if user is already logged in
+function checkAuthStatus() {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+    
+    if (token && user.username) {
+        // Redirect based on role
+        if (user.role === 'admin') {
+            window.location.href = '../admin/admin.html';
+        } else {
+            window.location.href = '../index/index.html';
+        }
+    }
+}
 
-    document.querySelector('.social-btn.facebook').addEventListener('click', () => {
-        // Implement Facebook login
-        console.log('Facebook login clicked');
-    });
-}); 
+// Check auth status when page loads
+document.addEventListener('DOMContentLoaded', checkAuthStatus);

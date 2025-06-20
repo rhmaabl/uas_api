@@ -12,11 +12,23 @@ function order() {
 
 // Fetch menu items from backend
 async function fetchMenuItems() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/menu`);
+    try{
+        const response = await fetch(`${API_BASE_URL}/menu`, {
+            headers: {
+                'x-api-key': 'fe9955e426b64dee80f51bc39ba7076d',
+                'Content-Type': 'application/json'
+            }
+        });
+        
         if (!response.ok) {
+            if (response.status === 401 || response.status === 403) {
+           
+                window.location.href = '../login/login.html';
+                return;
+            }
             throw new Error(`HTTP error! status: ${response.status}`);
         }
+        
         const data = await response.json();
         menuItems = data;
         displayMenuItems();

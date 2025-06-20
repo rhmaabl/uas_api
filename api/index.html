@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restaurant Menu API - Documentation</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-content">
+      <a href="index.html" class="logo">Restaurant API</a>
+      <div class="nav-links">
+        <a href="register.html">Register</a>
+        <a href="login.html">Login</a>
+        <a href="dashboard.html">Dashboard</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="hero">
+      <h1>Restaurant Menu API</h1>
+      <p>Access restaurant menu data with our simple and powerful API</p>
+    </div>
+
+    <div class="card">
+      <h2>Getting Started</h2>
+      <p>Follow these steps to start using our API:</p>
+      <ol style="margin: 1rem 0 1rem 1.5rem;">
+        <li>Create an account through our <a href="register.html">registration page</a></li>
+        <li>Log in to your account to get your API key</li>
+        <li>Use your API key in the request header: <code>x-api-key</code></li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>API Endpoints</h2>
+      
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method get">GET</span>
+          <code>/api/menu</code>
+          <p>Get all menu items</p>
+        </div>
+        <div class="endpoint-body">
+          <strong>Headers:</strong>
+          <pre>{
+  "x-api-key": "your-api-key"
+}</pre>
+          <strong>Response:</strong>
+          <pre>{
+  "data": [
+    {
+      "id": 1,
+      "nama": "Nasi Goreng",
+      "harga": 25000,
+      "kategori": "Makanan Utama"
+    }
+  ]
+}</pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method get">GET</span>
+          <code>/api/menu/:id</code>
+          <p>Get menu item by ID</p>
+        </div>
+        <div class="endpoint-body">
+          <strong>Headers:</strong>
+          <pre>{
+  "x-api-key": "your-api-key"
+}</pre>
+          <strong>Response:</strong>
+          <pre>{
+  "id": 1,
+  "nama": "Nasi Goreng",
+  "harga": 25000,
+  "kategori": "Makanan Utama"
+}</pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method post">POST</span>
+          <code>/api/auth/register</code>
+          <p>Register new user</p>
+        </div>
+        <div class="endpoint-body">
+          <strong>Request Body:</strong>
+          <pre>{
+  "username": "john_doe",
+  "email": "john@example.com",
+  "password": "secure_password"
+}</pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method post">POST</span>
+          <code>/api/auth/login</code>
+          <p>Login user</p>
+        </div>
+        <div class="endpoint-body">
+          <strong>Request Body:</strong>
+          <pre>{
+  "email": "john@example.com",
+  "password": "secure_password"
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Need Help?</h2>
+      <p>For more detailed documentation and support, please visit your dashboard after logging in.</p>
+      <a href="register.html" class="btn btn-primary" style="margin-top: 1rem;">Get Started</a>
+    </div>
+  </div>
+</body>
+</html> 

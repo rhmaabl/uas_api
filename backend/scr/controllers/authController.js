@@ -43,8 +43,8 @@ const authController = {
     // Login user
     login: async (req, res) => {
         try {
-            const { username, password } = req.body;
-            const user = await User.findOne({ where: { username } });
+            const { email, password } = req.body;
+            const user = await User.findOne({ where: { email } });
             if (!user) {
                 return res.status(401).json({ message: 'Invalid username or password' });
             }

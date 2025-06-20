@@ -1,9 +1,57 @@
 const API_BASE_URL = 'http://localhost:3000/api';
 
+// Check authentication and admin role
+function checkAdminAuth() {
+    const token = localStorage.getItem('token');
+    const userEmail = localStorage.getItem('userEmail');
+    const role = localStorage.getItem('role');
+    
+    // Check if user is logged in
+    if (!token || !userEmail) {
+        window.location.href = '../login/login.html';
+        return false;
+    }
+    
+    // Check if user has admin role
+    if (role !== 'admin') {
+        alert('Access denied. Admin privileges required.');
+        window.location.href = '../menu/menu.html';
+        return false;
+    }
+    
+    return true;
+}
+
+// Check authentication when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Check admin authentication first
+    if (!checkAdminAuth()) {
+        return; // Will redirect if not admin
+    }
+    
+    // Continue with admin functionality
+    initializeAdminPanel();
+});
+
+// Initialize admin panel functionality
+function initializeAdminPanel() {
+    // Initial load of data
+    getMenus();
+    getOrders();
+    getPayments();
+    getUsers();
+    updateDashboardStats();
+}
+
 // Menu Management
 async function getMenus() {
     try {
-        const response = await fetch('http://localhost:3000/api/menu');
+        const response = await fetch('http://localhost:3000/api/menu',{
+            headers: {
+                'x-api-key': 'fe9955e426b64dee80f51bc39ba7076d',
+                'Content-Type': 'application/json'
+            }
+        });
         const menus = await response.json();
         const tbody = document.querySelector('#menu .table tbody');
         tbody.innerHTML = ''; // Clear previous rows
@@ -81,7 +129,6 @@ async function fetchPaymentsData() {
 }
 
 // Navigation functionality
-
 document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', function(e) {
         if (this.getAttribute('href').startsWith('#')) {
@@ -113,7 +160,6 @@ document.querySelectorAll('.nav-link').forEach(link => {
 });
 
 // Form submission
-
 document.getElementById('addItemForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -155,243 +201,230 @@ document.getElementById('addItemForm').addEventListener('submit', async function
     }
 });
 
-// Orders management logic
+// Orders management
+async function getOrders() {
+    const response = await fetch('http://localhost:3000/api/orders');
+    const orders = await response.json();
+    const tbody = document.getElementById('ordersTableBody');
+    tbody.innerHTML = '';
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Orders
-    async function getOrders() {
-        const response = await fetch('http://localhost:3000/api/orders');
-        const orders = await response.json();
-        const tbody = document.getElementById('ordersTableBody');
-        tbody.innerHTML = '';
+    // Urutkan order dari terbaru ke terlama (opsional, agar histori paling baru di atas)
+    orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-        // Urutkan order dari terbaru ke terlama (opsional, agar histori paling baru di atas)
-        orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    orders.forEach(order => {
+        order.order_items.forEach((item, idx) => {
+            const tr = document.createElement('tr');
+            const totalHarga = item.harga_satuan * item.jumlah;
+            // Ambil nama customer dari order.user.username, fallback ke email atau '-'
+            const customerName = order.user && order.user.username ? order.user.username : (order.user && order.user.email ? order.user.email : '-');
+            tr.innerHTML = `
+                ${idx === 0 ? `<td rowspan="${order.order_items.length}">${order.id_order}</td>` : ''}
+                <td>${customerName}</td>
+                <td>${item.menu ? item.menu.nama : '-'}</td>
+                <td>Rp ${item.harga_satuan.toLocaleString('id-ID')}</td>
+                <td>${item.jumlah}</td>
+                <td>Rp ${item.subtotal}</td>
+                <td>Rp ${order.total}</td>
+                ${idx === 0 ? `<td rowspan="${order.order_items.length}">${order.status}</td>` : ''}
+                ${idx === 0 ? `
+                <td rowspan="${order.order_items.length}">
+                    <button class="btn btn-success order-complete" ${order.status === 'Completed' ? 'disabled' : ''}>Complete</button>
+                    <button class="btn btn-danger order-cancel" ${order.status === 'Cancelled' ? 'disabled' : ''}>Cancel</button>
+                </td>
+                ` : ''}
+            `;
+            tbody.appendChild(tr);
+        });
+    });
 
-        orders.forEach(order => {
-            order.order_items.forEach((item, idx) => {
-                const tr = document.createElement('tr');
-                const totalHarga = item.harga_satuan * item.jumlah;
-                // Ambil nama customer dari order.user.username, fallback ke email atau '-'
-                const customerName = order.user && order.user.username ? order.user.username : (order.user && order.user.email ? order.user.email : '-');
-                tr.innerHTML = `
-                    ${idx === 0 ? `<td rowspan="${order.order_items.length}">${order.id_order}</td>` : ''}
-                    <td>${customerName}</td>
-                    <td>${item.menu ? item.menu.nama : '-'}</td>
-                    <td>Rp ${item.harga_satuan.toLocaleString('id-ID')}</td>
-                    <td>${item.jumlah}</td>
-                    <td>Rp ${item.subtotal}</td>
-                    <td>Rp ${order.total}</td>
-                    ${idx === 0 ? `<td rowspan="${order.order_items.length}">${order.status}</td>` : ''}
-                    ${idx === 0 ? `
-                    <td rowspan="${order.order_items.length}">
-                        <button class="btn btn-success order-complete" ${order.status === 'Completed' ? 'disabled' : ''}>Complete</button>
-                        <button class="btn btn-danger order-cancel" ${order.status === 'Cancelled' ? 'disabled' : ''}>Cancel</button>
-                    </td>
-                    ` : ''}
-                `;
-                tbody.appendChild(tr);
-            });
+    // Re-attach event listeners after rendering
+    attachOrderEventListeners();
+}
+
+// Payment Management
+async function getPayments() {
+    try {
+        const response = await fetch('http://localhost:3000/api/payment');
+        const payments = await response.json();
+        const tbody = document.getElementById('paymentsTableBody');
+        tbody.innerHTML = ''; // Clear previous rows
+
+        payments.forEach(payment => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>#P${payment.id_payment}</td>
+                <td>#${payment.id_order}</td>
+                <td>${payment.customer}</td>
+                <td>Rp ${payment.total.toLocaleString('id-ID')}</td>
+                <td>${payment.metode}</td>
+                <td><span class="badge ${payment.status === 'paid' ? 'bg-success' : 'bg-warning'}">${payment.status === 'paid' ? 'Paid' : 'Pending'}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-success payment-complete" ${payment.status === 'paid' ? 'disabled' : ''} data-payment-id="${payment.id_payment}">
+                        ${payment.status === 'paid' ? 'Paid' : 'Mark as Paid'}
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
         });
 
-        // Re-attach event listeners after rendering
-        attachOrderEventListeners();
+        // Attach event listeners to payment buttons
+        attachPaymentEventListeners();
+    } catch (error) {
+        console.error('Error fetching payments:', error);
+        alert('Failed to load payments. Please try again later.');
     }
+}
 
-    
-    // Payment Management
-    async function getPayments() {
-        try {
-            const response = await fetch('http://localhost:3000/api/payment');
-            const payments = await response.json();
-            const tbody = document.getElementById('paymentsTableBody');
-            tbody.innerHTML = ''; // Clear previous rows
+// User Management
+async function getUsers() {
+    try {
+        const response = await fetch('http://localhost:3000/api/users');
+        const users = await response.json();
+        const tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = ''; // Clear previous rows
 
-            payments.forEach(payment => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>#P${payment.id_payment}</td>
-                    <td>#${payment.id_order}</td>
-                    <td>${payment.customer}</td>
-                    <td>Rp ${payment.total.toLocaleString('id-ID')}</td>
-                    <td>${payment.metode}</td>
-                    <td><span class="badge ${payment.status === 'paid' ? 'bg-success' : 'bg-warning'}">${payment.status === 'paid' ? 'Paid' : 'Pending'}</span></td>
-                    <td>
-                        <button class="btn btn-sm btn-success payment-complete" ${payment.status === 'paid' ? 'disabled' : ''} data-payment-id="${payment.id_payment}">
-                            ${payment.status === 'paid' ? 'Paid' : 'Mark as Paid'}
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
+        users.forEach(user => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>#U${user.id_user}</td>
+                <td>${user.username}</td>
+                <td>${user.email || '-'}</td>
+                <td><span class="badge ${user.role === 'admin' ? 'bg-danger' : user.role === 'kasir' ? 'bg-primary' : 'bg-success'}">${user.role}</span></td>
+                <td><span class="badge bg-success">Active</span></td>
+                <td>
+                    <button class="btn btn-sm btn-primary" onclick="editUser(${user.id_user})">Edit</button>
+                    <button class="btn btn-sm btn-danger user-delete" data-user-id="${user.id_user}">Delete</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
 
-            // Attach event listeners to payment buttons
-            attachPaymentEventListeners();
-        } catch (error) {
-            console.error('Error fetching payments:', error);
-            alert('Failed to load payments. Please try again later.');
-        }
+        // Attach event listeners to delete buttons
+        attachUserEventListeners();
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        alert('Failed to load users. Please try again later.');
     }
+}
 
-    // User Management
-    async function getUsers() {
-        try {
-            const response = await fetch('http://localhost:3000/api/users');
-            const users = await response.json();
-            const tbody = document.getElementById('usersTableBody');
-            tbody.innerHTML = ''; // Clear previous rows
+// Function to attach payment event listeners
+function attachPaymentEventListeners() {
+    document.querySelectorAll('.payment-complete').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const paymentId = this.dataset.paymentId;
+            try {
+                const response = await fetch(`http://localhost:3000/api/payments/${paymentId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: 'paid' })
+                });
 
-            users.forEach(user => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>#U${user.id_user}</td>
-                    <td>${user.username}</td>
-                    <td>${user.email || '-'}</td>
-                    <td><span class="badge ${user.role === 'admin' ? 'bg-danger' : user.role === 'kasir' ? 'bg-primary' : 'bg-success'}">${user.role}</span></td>
-                    <td><span class="badge bg-success">Active</span></td>
-                    <td>
-                        <button class="btn btn-sm btn-primary" onclick="editUser(${user.id_user})">Edit</button>
-                        <button class="btn btn-sm btn-danger user-delete" data-user-id="${user.id_user}">Delete</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
+                if (response.ok) {
+                    const row = this.closest('tr');
+                    row.querySelector('.badge').className = 'badge bg-success';
+                    row.querySelector('.badge').textContent = 'Paid';
+                    this.textContent = 'Paid';
+                    this.classList.remove('btn-success');
+                    this.classList.add('btn-secondary');
+                    this.disabled = true;
+                } else {
+                    throw new Error('Failed to update payment status');
+                }
+            } catch (error) {
+                console.error('Error updating payment:', error);
+                alert('Failed to update payment status. Please try again later.');
+            }
+        });
+    });
+}
 
-            // Attach event listeners to delete buttons
-            attachUserEventListeners();
-        } catch (error) {
-            console.error('Error fetching users:', error);
-            alert('Failed to load users. Please try again later.');
-        }
-    }
-
-    // Function to attach payment event listeners
-    function attachPaymentEventListeners() {
-        document.querySelectorAll('.payment-complete').forEach(btn => {
-            btn.addEventListener('click', async function() {
-                const paymentId = this.dataset.paymentId;
+// Function to attach user event listeners
+function attachUserEventListeners() {
+    document.querySelectorAll('.user-delete').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const userId = this.dataset.userId;
+            if (confirm('Are you sure you want to delete this user?')) {
                 try {
-                    const response = await fetch(`http://localhost:3000/api/payments/${paymentId}/status`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ status: 'paid' })
+                    const response = await fetch(`http://localhost:3000/api/users/${userId}`, {
+                        method: 'DELETE'
                     });
 
                     if (response.ok) {
                         const row = this.closest('tr');
-                        row.querySelector('.badge').className = 'badge bg-success';
-                        row.querySelector('.badge').textContent = 'Paid';
-                        this.textContent = 'Paid';
-                        this.classList.remove('btn-success');
-                        this.classList.add('btn-secondary');
-                        this.disabled = true;
+                        row.remove();
+                        alert('User deleted successfully');
                     } else {
-                        throw new Error('Failed to update payment status');
+                        throw new Error('Failed to delete user');
                     }
                 } catch (error) {
-                    console.error('Error updating payment:', error);
-                    alert('Failed to update payment status. Please try again later.');
+                    console.error('Error deleting user:', error);
+                    alert('Failed to delete user. Please try again later.');
                 }
-            });
+            }
         });
-    }
+    });
+}
 
-    // Function to attach user event listeners
-    function attachUserEventListeners() {
-        document.querySelectorAll('.user-delete').forEach(btn => {
-            btn.addEventListener('click', async function() {
-                const userId = this.dataset.userId;
-                if (confirm('Are you sure you want to delete this user?')) {
-                    try {
-                        const response = await fetch(`http://localhost:3000/api/users/${userId}`, {
-                            method: 'DELETE'
-                        });
+// Function to attach order event listeners
+function attachOrderEventListeners() {
+    document.querySelectorAll('.order-complete').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const orderId = this.closest('tr').querySelector('td').textContent;
+            try {
+                const response = await fetch(`http://localhost:3000/api/orders/${orderId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: 'selesai' })
+                });
 
-                        if (response.ok) {
-                            const row = this.closest('tr');
-                            row.remove();
-                            alert('User deleted successfully');
-                        } else {
-                            throw new Error('Failed to delete user');
-                        }
-                    } catch (error) {
-                        console.error('Error deleting user:', error);
-                        alert('Failed to delete user. Please try again later.');
-                    }
+                if (response.ok) {
+                    const row = this.closest('tr');
+                    const statusCell = row.querySelector('td:nth-last-child(2)');
+                    statusCell.textContent = 'selesai';
+                    this.disabled = true;
+                    this.closest('td').querySelector('.order-cancel').disabled = true;
+                } else {
+                    throw new Error('Failed to update order status');
                 }
-            });
+            } catch (error) {
+                console.error('Error updating order:', error);
+                alert('Failed to update order status. Please try again later.');
+            }
         });
-    }
+    });
 
-    // Function to attach order event listeners
-    function attachOrderEventListeners() {
-        document.querySelectorAll('.order-complete').forEach(btn => {
-            btn.addEventListener('click', async function() {
-                const orderId = this.closest('tr').querySelector('td').textContent;
-                try {
-                    const response = await fetch(`http://localhost:3000/api/orders/${orderId}/status`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ status: 'selesai' })
-                    });
+    document.querySelectorAll('.order-cancel').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const orderId = this.closest('tr').querySelector('td').textContent;
+            try {
+                const response = await fetch(`http://localhost:3000/api/orders/${orderId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: 'Cancelled' })
+                });
 
-                    if (response.ok) {
-                        const row = this.closest('tr');
-                        const statusCell = row.querySelector('td:nth-last-child(2)');
-                        statusCell.textContent = 'selesai';
-                        this.disabled = true;
-                        this.closest('td').querySelector('.order-cancel').disabled = true;
-                    } else {
-                        throw new Error('Failed to update order status');
-                    }
-                } catch (error) {
-                    console.error('Error updating order:', error);
-                    alert('Failed to update order status. Please try again later.');
+                if (response.ok) {
+                    const row = this.closest('tr');
+                    const statusCell = row.querySelector('td:nth-last-child(2)');
+                    statusCell.textContent = 'Cancelled';
+                    this.disabled = true;
+                    this.closest('td').querySelector('.order-complete').disabled = true;
+                } else {
+                    throw new Error('Failed to update order status');
                 }
-            });
+            } catch (error) {
+                console.error('Error updating order:', error);
+                alert('Failed to update order status. Please try again later.');
+            }
         });
-
-        document.querySelectorAll('.order-cancel').forEach(btn => {
-            btn.addEventListener('click', async function() {
-                const orderId = this.closest('tr').querySelector('td').textContent;
-                try {
-                    const response = await fetch(`http://localhost:3000/api/orders/${orderId}/status`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ status: 'Cancelled' })
-                    });
-
-                    if (response.ok) {
-                        const row = this.closest('tr');
-                        const statusCell = row.querySelector('td:nth-last-child(2)');
-                        statusCell.textContent = 'Cancelled';
-                        this.disabled = true;
-                        this.closest('td').querySelector('.order-complete').disabled = true;
-                    } else {
-                        throw new Error('Failed to update order status');
-                    }
-                } catch (error) {
-                    console.error('Error updating order:', error);
-                    alert('Failed to update order status. Please try again later.');
-                }
-            });
-        });
-    }
-
-    // Initial load of data
-    getMenus();
-    getOrders();
-    getPayments();
-    getUsers();
-
-    updateDashboardStats();
-});
+    });
+}
 
 // Function to update dashboard statistics
 async function updateDashboardStats() {

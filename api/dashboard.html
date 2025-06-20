@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Restaurant Menu API</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-content">
+      <a href="index.html" class="logo">Restaurant API</a>
+      <div class="nav-links">
+        <a href="dashboard.html" class="active">Dashboard</a>
+        <button id="logoutBtn" class="btn btn-outline" style="margin-left: 1rem;">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="hero" style="text-align: left; padding: 2rem;">
+      <h1 style="font-size: 2rem;">Welcome to Your Dashboard</h1>
+      <p>Manage your API keys and explore the documentation</p>
+    </div>
+
+    <div class="card">
+      <h2>Your API Key</h2>
+      <p>Use this API key to authenticate your requests to protected endpoints.</p>
+      <div class="api-key" id="apiKey">Loading...</div>
+      <button id="generateBtn" class="btn btn-primary">Generate New Key</button>
+      <div id="apiKeyError" class="error"></div>
+    </div>
+
+    <div class="card">
+      <h2>API Documentation</h2>
+      
+      <h3 style="margin: 1.5rem 0 1rem;">Authentication</h3>
+      <p>Include your API key in all requests using the <code>x-api-key</code> header.</p>
+
+      <h3 style="margin: 2rem 0 1rem;">Authentication Endpoints</h3>
+      
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method post">POST</span>
+          <code>http://localhost:3000/api/auth/register</code>
+          <p>Register a new user account</p>
+        </div>
+        <div class="endpoint-body">
+          <strong>Request Body:</strong>
+          <pre>{
+  "username": "john_doe",
+  "email": "john@example.com",
+  "password": "secure_password",
+  "role": "pelanggan"
+}</pre>
+          <strong>Response:</strong>
+          <pre>{
+  "message": "User registered successfully",
+  "token": "jwt_token_here",
+  "user": {
+    "id": 1,
+    "username": "john_doe",
+    "email": "john@example.com",
+    "role": "pelanggan"
+  }
+}</pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method post">POST</span>
+          <code>http://localhost:3000/api/auth/login</code>
+          <p>Login with existing credentials</p>
+        </div>
+        <div class="endpoint-body">
+          <strong>Request Body:</strong>
+          <pre>{
+  "username": "john_doe",
+  "password": "secure_password"
+}</pre>
+          <strong>Response:</strong>
+          <pre>{
+  "message": "Login successful",
+  "token": "jwt_token_here",
+  "user": {
+    "id": 1,
+    "username": "john_doe",
+    "email": "john@example.com",
+    "role": "pelanggan"
+  }
+}</pre>
+        </div>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem;">Menu Endpoints (Protected)</h3>
+      
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method get">GET</span>
+          <code>http://localhost:3000/api/menu</code>
+          <p>Get all menu items</p>
+        </div>
+        <div class="endpoint-body">
+          <strong>Headers:</strong>
+          <pre>{
+  "x-api-key": "your-api-key"
+}</pre>
+          <strong>Response:</strong>
+          <pre>[
+  {
+    "id": 1,
+    "nama": "Nasi Goreng",
+    "harga": 25000,
+    "gambar": "nasi_goreng.jpg",
+    "jumlah": 10,
+    "id_kategori": 1,
+    "id_user": 1,
+    "kategori": {
+      "id_kategori": 1,
+      "nama_kategori": "Makanan Utama"
+    },
+    "user": {
+      "id_user": 1,
+      "username": "admin",
+      "email": "admin@example.com",
+      "role": "admin"
+    }
+  }
+]</pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method get">GET</span>
+          <code>http://localhost:3000/api/menu/:id</code>
+          <p>Get menu item by ID</p>
+        </div>
+        <div class="endpoint-body">
+          <strong>Parameters:</strong>
+          <p><code>id</code> - The ID of the menu item</p>
+          <strong>Headers:</strong>
+          <pre>{
+  "x-api-key": "your-api-key"
+}</pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method post">POST</span>
+          <code>http://localhost:3000/api/menu</code>
+          <p>Create a new menu item</p>
+        </div>
+        <div class="endpoint-body">
+          <strong>Headers:</strong>
+          <pre>{
+  "x-api-key": "your-api-key"
+}</pre>
+          <strong>Request Body:</strong>
+          <pre>{
+  "nama": "Nasi Goreng",
+  "harga": 25000,
+  "gambar": "nasi_goreng.jpg",
+  "jumlah": 10,
+  "id_kategori": 1,
+  "id_user": 1
+}</pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method put">PUT</span>
+          <code>http://localhost:3000/api/menu/:id</code>
+          <p>Update a menu item</p>
+        </div>
+        <div class="endpoint-body">
+          <strong>Headers:</strong>
+          <pre>{
+  "x-api-key": "your-api-key"
+}</pre>
+          <strong>Request Body:</strong>
+          <pre>{
+  "nama": "Nasi Goreng Spesial",
+  "harga": 30000
+}</pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method delete">DELETE</span>
+          <code>http://localhost:3000/api/menu/:id</code>
+          <p>Delete a menu item</p>
+        </div>
+        <div class="endpoint-body">
+          <strong>Headers:</strong>
+          <pre>{
+  "x-api-key": "your-api-key"
+}</pre>
+        </div>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem;">Category Endpoints</h3>
+      
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method get">GET</span>
+          <code>http://localhost:3000/api/kategori</code>
+          <p>Get all categories</p>
+        </div>
+        <div class="endpoint-body">
+          <strong>Response:</strong>
+          <pre>[
+  {
+    "id_kategori": 1,
+    "nama_kategori": "Makanan Utama"
+  }
+]</pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method get">GET</span>
+          <code>http://localhost:3000/api/kategori/:id</code>
+          <p>Get category by ID</p>
+        </div>
+        <div class="endpoint-body">
+          <strong>Parameters:</strong>
+          <p><code>id</code> - The ID of the category</p>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method post">POST</span>
+          <code>http://localhost:3000/api/kategori</code>
+          <p>Create a new category</p>
+        </div>
+        <div class="endpoint-body">
+          <strong>Request Body:</strong>
+          <pre>{
+  "nama_kategori": "Minuman"
+}</pre>
+        </div>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem;">Order Endpoints</h3>
+      
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method get">GET</span>
+          <code>http://localhost:3000/api/orders</code>
+          <p>Get all orders</p>
+        </div>
+        <div class="endpoint-body">
+          <strong>Response:</strong>
+          <pre>[
+  {
+    "id": 1,
+    "user_id": 1,
+    "total_amount": 50000,
+    "status": "pending",
+    "created_at": "2024-01-01T00:00:00.000Z"
+  }
+]</pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method post">POST</span>
+          <code>http://localhost:3000/api/orders</code>
+          <p>Create a new order</p>
+        </div>
+        <div class="endpoint-body">
+          <strong>Request Body:</strong>
+          <pre>{
+  "user_id": 1,
+  "total_amount": 50000,
+  "items": [
+    {
+      "menu_id": 1,
+      "quantity": 2,
+      "price": 25000
+    }
+  ]
+}</pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method put">PUT</span>
+          <code>http://localhost:3000/api/orders/:id/status</code>
+          <p>Update order status</p>
+        </div>
+        <div class="endpoint-body">
+          <strong>Request Body:</strong>
+          <pre>{
+  "status": "completed"
+}</pre>
+        </div>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem;">Payment Endpoints</h3>
+      
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method get">GET</span>
+          <code>http://localhost:3000/api/payment</code>
+          <p>Get all payments</p>
+        </div>
+        <div class="endpoint-body">
+          <strong>Response:</strong>
+          <pre>[
+  {
+    "id": 1,
+    "order_id": 1,
+    "amount": 50000,
+    "payment_method": "cash",
+    "status": "completed",
+    "created_at": "2024-01-01T00:00:00.000Z"
+  }
+]</pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method post">POST</span>
+          <code>http://localhost:3000/api/payment</code>
+          <p>Create a new payment</p>
+        </div>
+        <div class="endpoint-body">
+          <strong>Request Body:</strong>
+          <pre>{
+  "order_id": 1,
+  "amount": 50000,
+  "payment_method": "cash"
+}</pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method put">PUT</span>
+          <code>http://localhost:3000/api/payment/:id/status</code>
+          <p>Update payment status</p>
+        </div>
+        <div class="endpoint-body">
+          <strong>Request Body:</strong>
+          <pre>{
+  "status": "completed"
+}</pre>
+        </div>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem;">User Endpoints</h3>
+      
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method get">GET</span>
+          <code>http://localhost:3000/api/users</code>
+          <p>Get all users</p>
+        </div>
+        <div class="endpoint-body">
+          <strong>Response:</strong>
+          <pre>[
+  {
+    "id_user": 1,
+    "username": "john_doe",
+    "email": "john@example.com",
+    "role": "pelanggan"
+  }
+]</pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method get">GET</span>
+          <code>http://localhost:3000/api/users/me</code>
+          <p>Get current user profile</p>
+        </div>
+        <div class="endpoint-body">
+          <strong>Headers:</strong>
+          <pre>{
+  "Authorization": "Bearer your-jwt-token"
+}</pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method get">GET</span>
+          <code>http://localhost:3000/api/users/:id</code>
+          <p>Get user by ID</p>
+        </div>
+        <div class="endpoint-body">
+          <strong>Parameters:</strong>
+          <p><code>id</code> - The ID of the user</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Error Responses</h2>
+      <p>All endpoints may return the following error responses:</p>
+      
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span style="background: #ffebee; color: #b71c1c; padding: 0.25rem 0.75rem; border-radius: 4px;">401</span>
+          <code>Unauthorized</code>
+          <p>Missing or invalid API key</p>
+        </div>
+        <div class="endpoint-body">
+          <pre>{
+  "error": "API key required"
+}</pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span style="background: #ffebee; color: #b71c1c; padding: 0.25rem 0.75rem; border-radius: 4px;">403</span>
+          <code>Forbidden</code>
+          <p>Invalid or inactive API key</p>
+        </div>
+        <div class="endpoint-body">
+          <pre>{
+  "error": "Invalid or inactive API key"
+}</pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span style="background: #ffebee; color: #b71c1c; padding: 0.25rem 0.75rem; border-radius: 4px;">404</span>
+          <code>Not Found</code>
+          <p>Resource not found</p>
+        </div>
+        <div class="endpoint-body">
+          <pre>{
+  "error": "Menu not found"
+}</pre>
+        </div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span style="background: #ffebee; color: #b71c1c; padding: 0.25rem 0.75rem; border-radius: 4px;">500</span>
+          <code>Internal Server Error</code>
+          <p>Server error</p>
+        </div>
+        <div class="endpoint-body">
+          <pre>{
+  "error": "Failed to fetch menu items"
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="dashboard.js"></script>
+</body>
+</html> 

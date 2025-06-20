@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Restaurant Menu API</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-content">
+      <a href="index.html" class="logo">Restaurant API</a>
+      <div class="nav-links">
+        <a href="register.html">Register</a>
+        <a href="login.html" class="active">Login</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="card" style="max-width: 500px; margin: 80px auto;">
+      <h2 style="text-align: center; margin-bottom: 2rem;">Welcome Back</h2>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" class="form-control" required placeholder="Enter your email">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" class="form-control" required placeholder="Enter your password">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+      </form>
+      <div id="error" class="error"></div>
+      <div style="text-align: center; margin-top: 1.5rem;">
+        Don't have an account? <a href="register.html">Register here</a>
+      </div>
+    </div>
+  </div>
+  <script src="login.js"></script>
+</body>
+</html> 
